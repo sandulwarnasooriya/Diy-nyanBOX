@@ -191,7 +191,67 @@ Got questions? Want to show off your device? Need help?
 - **[GitHub Issues](https://github.com/jbohack/nyanBOX/issues)** - Report bugs or request features
 - **[nyandevices.com](https://nyandevices.com)** - Full docs and guides
 
----
+--
+## diy
+   Nyanbox price is similar to flipper zero but we can diy nyanbox.I created a diy of it.Here you can build it too under 30 dollars
++Components:
+  *3 nrf24l01(or you can use one or two)
+  *ESP32-Wroom-32 or on board anterna(wroom 32 is best for long range)
+  *ssd1306 or sh1106(sh1106 for   better visibility)
+  *5 push buttons 
+   $to create it portable$
+     *DC to DC boost up converter
+      *Mini side switch
+      *3.7 lithium rechargeable battery
+      *tp4056 charging module type c or micro usb
++Wiring--------------------------------------
+*ssd1306 or sh1106 with esp32 
+Gnd-gnd
+Vcc-3v3
+Scl-22
+Sda-21
+*Nrf24l01 with esp32 
+ -Default pins(connect these pins        together *only ce and cns pins are different*)
+   Gnd-gnd
+   Vcc-3v3 
+   Mosi-23
+   Miso-19
+   Sck-18
+-ce,cns pins
+   +First module
+      Ce-5
+      Csn-17
+    +Second module
+      Ce-16
+      Csn-4
+     +Third module
+       Ce-15
+       Csn-2
+*Buttons with esp32 
+   Gnd-gnd
+   Up-26
+   Down-33
+   Select-32
+   Right-27
+   Left-25
+*Tp4056 connection
+  B+ to battery+
+  B- to battery -
+  Out- to boost up converter in -
+  Out+ to boost up converter in +
+*Boost up converter (you must adjust it to 5v out put)
+   boost up converter out+ to mini side switch
+boost up converter out- to esp32 gnd
+Mini side Switch to 5v
++Flashing esp32--------------------------
+Go to the nyanbox GitHub page and download repo in firmware files.
+Use spacehun flasher or esp32 flash download or using Android use esp32_flash in play store 
+Offsets:
++Bootloader 0x1000
++Partition 0x8000
++Firmware 0x10000
+-----------------------------
+Do can have diy nyanbox
 
 ## 💝 Support the Project
 
