@@ -52,6 +52,7 @@
 #include "../include/legal_disclaimer.h"
 #include "../include/cardskimmer_detector.h"
 #include "../include/axon_detector.h"
+#include "../include/drone_detector.h"
 #include "../include/flock_detector.h"
 #include "../include/pineapple_detector.h"
 #include "../include/display_mirror.h"
@@ -452,6 +453,7 @@ constexpr int BLE_MENU_SIZE = sizeof(bleMenu) / sizeof(bleMenu[0]);
 
 MenuItem otherMenu[] = {
   { "SigKill",   nullptr, sigkillSetup,   sigkillLoop,   cleanupRadio },
+  { "Drone Detector", nullptr, droneDetectorSetup, droneDetectorLoop, cleanupDroneDetector },
   { "Flock Detector", nullptr, flockDetectorSetup, flockDetectorLoop, cleanupFlockDetector },
   { "Scanner",      nullptr, scannerSetup,    scannerLoop,    cleanupRadio },
   { "Analyzer",     nullptr, analyzerSetup,   analyzerLoop,   cleanupRadio },

@@ -88,6 +88,7 @@ Built around an ESP32 with triple NRF24 modules, a crisp OLED display, and a 250
 - **BLE Spoofer** – Clones and rebroadcasts detected BLE devices with complete 1:1 replication of MAC address, name, advertising data, scan response, and connectable state.
 
 ### 📡 Signal & Protocol Tools
+- **Drone Detector** – Detects nearby drones broadcasting RemoteID via WiFi and BLE. Displays drone identification, GPS location, altitude, speed, operator information, and flight status. Features a locate mode with real-time RSSI signal strength meter to help pinpoint drone positions.
 - **Flock Detector** - Detects Flock Safety surveillance cameras using dual-mode WiFi and BLE scanning. Identifies devices through SSID patterns, MAC OUI prefixes, and Bluetooth device names. Features real-time signal strength tracking with detailed device info and a locate mode for pinpointing camera positions.
 - **Scanner** – Scans the 2.4GHz frequency band to detect active channels and devices
 - **Analyzer** – Analyzes detected signals and provides detailed activity information
@@ -222,6 +223,7 @@ Love nyanBOX? Here's how you can help:
 - [PwnGridSpam](https://github.com/7h30th3r0n3/PwnGridSpam)
 - [ESP32-AirTag-Scanner](https://github.com/MatthewKuKanich/ESP32-AirTag-Scanner)
 - [BLE Spam Flipper Application](https://github.com/Next-Flip/Momentum-Apps/tree/c470da2d792fc8c4f165ae2906d79250c33a823c/ble_spam)
+- [opendroneid-core-c](https://github.com/opendroneid/opendroneid-core-c)
 - [ESP Web Tools](https://esphome.github.io/esp-web-tools/)
 - [Flock You](https://github.com/colonelpanichacks/flock-you)
 - [Original nRFBOX Project](https://github.com/cifertech/nrfbox)
