@@ -192,66 +192,91 @@ Got questions? Want to show off your device? Need help?
 - **[nyandevices.com](https://nyandevices.com)** - Full docs and guides
 
 --
-## diy
-   Nyanbox price is similar to flipper zero but we can diy nyanbox.I created a diy of it.Here you can build it too under 30 dollars
-+Components:
-  *3 nrf24l01(or you can use one or two)
-  *ESP32-Wroom-32 or on board anterna(wroom 32 is best for long range)
-  *ssd1306 or sh1106(sh1106 for   better visibility)
-  *5 push buttons 
-   $to create it portable$
-     *DC to DC boost up converter
-      *Mini side switch
-      *3.7 lithium rechargeable battery
-      *tp4056 charging module type c or micro usb
-+Wiring--------------------------------------
-*ssd1306 or sh1106 with esp32 
-Gnd-gnd
-Vcc-3v3
-Scl-22
-Sda-21
-*Nrf24l01 with esp32 
- -Default pins(connect these pins        together *only ce and cns pins are different*)
-   Gnd-gnd
-   Vcc-3v3 
-   Mosi-23
-   Miso-19
-   Sck-18
--ce,cns pins
-   +First module
-      Ce-5
-      Csn-17
-    +Second module
-      Ce-16
-      Csn-4
-     +Third module
-       Ce-15
-       Csn-2
-*Buttons with esp32 
-   Gnd-gnd
-   Up-26
-   Down-33
-   Select-32
-   Right-27
-   Left-25
-*Tp4056 connection
-  B+ to battery+
-  B- to battery -
-  Out- to boost up converter in -
-  Out+ to boost up converter in +
-*Boost up converter (you must adjust it to 5v out put)
-   boost up converter out+ to mini side switch
-boost up converter out- to esp32 gnd
-Mini side Switch to 5v
-+Flashing esp32--------------------------
-Go to the nyanbox GitHub page and download repo in firmware files.
-Use spacehun flasher or esp32 flash download or using Android use esp32_flash in play store 
-Offsets:
-+Bootloader 0x1000
-+Partition 0x8000
-+Firmware 0x10000
------------------------------
-Do can have diy nyanbox
+## 🐱 Nyanbox DIY Guide
+
+Build your own high-performance wireless security tool for under **$30**. The Nyanbox is a powerful, open-source alternative to the Flipper Zero, utilizing the ESP32 and NRF24L01 modules for sub-GHz and 2.4GHz research.
+
+---
+
+## 🛠️ Components Needed
+
+### Core Electronics
+* **MCU:** ESP32-WROOM-32 (External antenna version recommended for maximum range)
+* **RF:** 1 to 3 x NRF24L01 Modules
+* **Display:** SSD1306 or SH1106 (OLED 128x64)
+* **Buttons:** 5x Tactile Push Buttons
+
+### Power Management (For Portability)
+* **Battery:** 3.7V Lithium Rechargeable Battery
+* **Charger:** TP4056 Module (Type-C or Micro USB)
+* **Voltage:** DC-DC Boost Converter (Adjusted to 5V)
+* **Switch:** Mini Slide Switch
+
+---
+
+## 🔌 Wiring Diagram
+
+### 1. Display (OLED)
+| Display Pin | ESP32 Pin |
+| :--- | :--- |
+| GND | GND |
+| VCC | 3V3 |
+| SCL | GPIO 22 |
+| SDA | GPIO 21 |
+
+### 2. NRF24L01 Modules
+All modules share common SPI pins. The **CE** and **CSN** pins must be unique for each module.
+
+
+
+| NRF Pin | ESP32 Pin (Common) |
+| :--- | :--- |
+| GND | GND |
+| VCC | 3V3 |
+| MOSI | GPIO 23 |
+| MISO | GPIO 19 |
+| SCK | GPIO 18 |
+
+**Module Chip Select:**
+* **Module 1:** CE (5), CSN (17)
+* **Module 2:** CE (16), CSN (4)
+* **Module 3:** CE (15), CSN (2)
+
+### 3. Navigation Buttons
+| Button | ESP32 Pin |
+| :--- | :--- |
+| **Up** | GPIO 26 |
+| **Down** | GPIO 33 |
+| **Select** | GPIO 32 |
+| **Right** | GPIO 27 |
+| **Left** | GPIO 25 |
+*Note: Connect the other side of all buttons to **GND**.*
+
+### 4. Power Configuration
+1.  **Charging:** Battery (+) and (-) to TP4056 `B+` and `B-`.
+2.  **Boosting:** TP4056 `Out+`/`Out-` to Boost Converter `In+`/`In-`.
+3.  **Regulation:** Adjust Boost Converter to **5V output**.
+4.  **Control:** Connect Boost `Out+` to the **Slide Switch**, then to the ESP32 `5V` pin.
+5.  **Common Ground:** Boost `Out-` to ESP32 `GND`.
+
+---
+
+## 💾 Flashing Firmware
+
+1.  Download the repository firmware files.
+2.  Use **Spacehuhn Flasher**, **ESP32 Flash Download Tool**, or **esp32_flash** (Android).
+3.  Set the following **Offsets**:
+
+| File | Address/Offset |
+| :--- | :--- |
+| **Bootloader** | `0x1000` |
+| **Partition Table** | `0x8000` |
+| **Firmware (.bin)** | `0x10000` |
+
+---
+
+> **Warning:** This tool is for educational and authorized security testing purposes only. Always respect local laws regarding radio frequencies.
+
 
 ## 💝 Support the Project
 
