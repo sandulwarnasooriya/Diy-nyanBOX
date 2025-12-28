@@ -424,7 +424,7 @@ MenuItem mainMenu[] = {
 constexpr int MAIN_MENU_SIZE = sizeof(mainMenu) / sizeof(mainMenu[0]);
 
 MenuItem wifiMenu[] = {
-  { "WiFi Scan",       nullptr, wifiscanSetup,           wifiscanLoop,           cleanupWiFi },
+  { "WiFi Scan",       nullptr, wifiscanSetup,           wifiscanLoop,           wifiscanCleanup },
   { "Channel Analyzer", nullptr, channelAnalyzerSetup,   channelAnalyzerLoop,    cleanupWiFi },
   { "WiFi Deauther",   nullptr, deauthSetup,             deauthLoop,             cleanupWiFi },
   { "Deauth Scanner",  nullptr, deauthScannerSetup,      deauthScannerLoop,      cleanupWiFi },

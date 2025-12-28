@@ -60,7 +60,7 @@ Built around an ESP32 with triple NRF24 modules, a crisp OLED display, and a 250
 > **⚠️ Note:** Additional advanced tools can be enabled in the Settings menu.
 
 ### 📶 WiFi Tools
-- **WiFi Scanner** – Detects nearby WiFi access points
+- **WiFi Scanner** – Detects nearby WiFi access points with full client detection. View connected clients for each network, monitor their signal strength, packet activity, and deauthenticate individual clients.
 - **Channel Analyzer** – Monitors WiFi channel utilization and signal strength for network planning
 - **WiFi Deauther** – Educational tool for testing network security with deauthentication frames on authorized networks
 - **Deauth Scanner** – Monitors and analyzes WiFi deauthentication frames in real-time
