@@ -566,14 +566,29 @@ void setup() {
   Serial.begin(115200);
 
   neopixelSetup();
-  for (auto &r : radios) {
-    r.begin();
-    r.setAutoAck(false);
-    r.stopListening();
-    r.setRetries(0,0);
-    r.setPALevel(RF24_PA_MAX, true);
-    r.setDataRate(RF24_2MBPS);
-    r.setCRCLength(RF24_CRC_DISABLED);
+  SPI.begin();
+
+  int cePins[] = {RADIO_CE_PIN_1, RADIO_CE_PIN_2, RADIO_CE_PIN_3};
+  int csnPins[] = {RADIO_CSN_PIN_1, RADIO_CSN_PIN_2, RADIO_CSN_PIN_3};
+
+  for (int i = 0; i < 3; i++) {
+    pinMode(cePins[i], OUTPUT);
+    pinMode(csnPins[i], OUTPUT);
+    digitalWrite(csnPins[i], HIGH);
+    digitalWrite(cePins[i], LOW);
+  }
+  delay(100);
+
+  for (int i = 0; i < 3; i++) {
+    if (!radios[i].begin() || !radios[i].isChipConnected()) {
+      while(true) { delay(1000); }
+    }
+    radios[i].setAutoAck(false);
+    radios[i].stopListening();
+    radios[i].setRetries(0,0);
+    radios[i].setPALevel(RF24_PA_MAX, true);
+    radios[i].setDataRate(RF24_2MBPS);
+    radios[i].setCRCLength(RF24_CRC_DISABLED);
   }
 
   EEPROM.begin(512);
