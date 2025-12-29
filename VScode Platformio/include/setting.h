@@ -18,10 +18,15 @@
 extern bool neoPixelActive;
 extern bool dangerousActionsEnabled;
 extern bool continuousScanEnabled;
+extern bool privacyModeEnabled;
 
 void settingSetup();
 void settingLoop();
 bool isDangerousActionsEnabled();
 bool isContinuousScanEnabled();
+bool isPrivacyModeEnabled();
+
+void maskMAC(const char* original, char* masked);
+void maskName(const char* original, char* masked, int maxLen);
 
 #endif

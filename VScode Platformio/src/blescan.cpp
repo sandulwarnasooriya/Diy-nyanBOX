@@ -507,10 +507,14 @@ void blescanLoop() {
         u8g2.setFont(u8g2_font_5x8_tr);
         char buf[32];
 
-        snprintf(buf, sizeof(buf), "%.16s", dev.name);
+        char maskedName[33];
+        maskName(dev.name, maskedName, sizeof(maskedName) - 1);
+        snprintf(buf, sizeof(buf), "%.16s", maskedName);
         u8g2.drawStr(0, 8, buf);
 
-        snprintf(buf, sizeof(buf), "%s", dev.address);
+        char maskedAddress[18];
+        maskMAC(dev.address, maskedAddress);
+        snprintf(buf, sizeof(buf), "%s", maskedAddress);
         u8g2.drawStr(0, 16, buf);
 
         u8g2.setFont(u8g2_font_7x13B_tr);
@@ -555,9 +559,13 @@ void blescanLoop() {
         auto &dev = bleDevices[currentIndex];
         u8g2.setFont(u8g2_font_5x8_tr);
         char buf[32];
-        snprintf(buf, sizeof(buf), "Name: %s", dev.name);
+        char maskedName[33];
+        maskName(dev.name, maskedName, sizeof(maskedName) - 1);
+        snprintf(buf, sizeof(buf), "Name: %s", maskedName);
         u8g2.drawStr(0, 10, buf);
-        snprintf(buf, sizeof(buf), "Addr: %s", dev.address);
+        char maskedAddress[18];
+        maskMAC(dev.address, maskedAddress);
+        snprintf(buf, sizeof(buf), "Addr: %s", maskedAddress);
         u8g2.drawStr(0, 20, buf);
         snprintf(buf, sizeof(buf), "RSSI: %d", dev.rssi);
         u8g2.drawStr(0, 30, buf);
@@ -578,7 +586,9 @@ void blescanLoop() {
                 u8g2.drawStr(0, 20 + i * 10, ">");
             char line[32];
             const char* displayName = d.hasName && d.name[0] ? d.name : "Unknown";
-            snprintf(line, sizeof(line), "%.8s | RSSI %d", displayName, d.rssi);
+            char maskedName[33];
+            maskName(displayName, maskedName, sizeof(maskedName) - 1);
+            snprintf(line, sizeof(line), "%.8s | RSSI %d", maskedName, d.rssi);
             u8g2.drawStr(10, 20 + i * 10, line);
         }
     }

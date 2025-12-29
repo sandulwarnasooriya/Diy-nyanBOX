@@ -13,6 +13,7 @@
 #include "../include/blescan.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
+#include "../include/setting.h"
 #include "esp_bt.h"
 #include "esp_gap_ble_api.h"
 #include "esp_bt_main.h"
@@ -97,11 +98,15 @@ static void drawCloneSelect() {
   }
   auto &target = bleDevices[cloneTargetIndex];
   char targetInfo[32];
-  snprintf(targetInfo, sizeof(targetInfo), "%.14s", target.name);
+  char maskedName[33];
+  maskName(target.name, maskedName, sizeof(maskedName) - 1);
+  snprintf(targetInfo, sizeof(targetInfo), "%.14s", maskedName);
   u8g2.drawStr(0, 24, targetInfo);
 
   char addrInfo[32];
-  snprintf(addrInfo, sizeof(addrInfo), "%.17s", target.address);
+  char maskedAddress[18];
+  maskMAC(target.address, maskedAddress);
+  snprintf(addrInfo, sizeof(addrInfo), "%.17s", maskedAddress);
   u8g2.drawStr(0, 36, addrInfo);
 
   u8g2.setFont(u8g2_font_5x8_tr);
@@ -127,11 +132,15 @@ static void drawCloneRunning() {
   auto &target = bleDevices[cloneTargetIndex];
 
   char nameStr[20];
-  snprintf(nameStr, sizeof(nameStr), "%.14s", target.name);
+  char maskedName[33];
+  maskName(target.name, maskedName, sizeof(maskedName) - 1);
+  snprintf(nameStr, sizeof(nameStr), "%.14s", maskedName);
   u8g2.drawStr(0, 24, nameStr);
 
   char addrStr[20];
-  snprintf(addrStr, sizeof(addrStr), "%.17s", target.address);
+  char maskedAddress[18];
+  maskMAC(target.address, maskedAddress);
+  snprintf(addrStr, sizeof(addrStr), "%.17s", maskedAddress);
   u8g2.drawStr(0, 36, addrStr);
 
   u8g2.setFont(u8g2_font_5x8_tr);

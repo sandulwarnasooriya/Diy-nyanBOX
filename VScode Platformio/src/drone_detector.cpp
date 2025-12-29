@@ -928,7 +928,13 @@ static void drawList() {
 
         char line[32];
         const char *display_id = (drone.id[0] != '\0') ? drone.id : drone.mac;
-        snprintf(line, sizeof(line), "%.12s %d", display_id, drone.rssi);
+        char maskedID[33];
+        if (drone.id[0] != '\0') {
+            maskName(drone.id, maskedID, sizeof(maskedID) - 1);
+        } else {
+            maskMAC(drone.mac, maskedID);
+        }
+        snprintf(line, sizeof(line), "%.12s %d", maskedID, drone.rssi);
         u8g2.drawStr(10, 20 + i * 10, line);
     }
 
@@ -952,7 +958,13 @@ static void drawDetail() {
 
     if (detailPage == 0) {
         const char *display_id = (drone.id[0] != '\0') ? drone.id : drone.mac;
-        snprintf(buf, sizeof(buf), "ID: %s", display_id);
+        char maskedID[33];
+        if (drone.id[0] != '\0') {
+            maskName(drone.id, maskedID, sizeof(maskedID) - 1);
+        } else {
+            maskMAC(drone.mac, maskedID);
+        }
+        snprintf(buf, sizeof(buf), "ID: %s", maskedID);
         u8g2.drawStr(0, 10, buf);
 
         snprintf(buf, sizeof(buf), "Type: %s", get_ua_type_string(drone.uaType));
@@ -970,14 +982,26 @@ static void drawDetail() {
 
     } else if (detailPage == 1) {
         if (drone.latitude != 0 || drone.longitude != 0) {
-            snprintf(buf, sizeof(buf), "Lat: %.6f", drone.latitude);
+            if (isPrivacyModeEnabled()) {
+                snprintf(buf, sizeof(buf), "Lat: **.**");
+            } else {
+                snprintf(buf, sizeof(buf), "Lat: %.6f", drone.latitude);
+            }
             u8g2.drawStr(0, 10, buf);
 
-            snprintf(buf, sizeof(buf), "Lng: %.6f", drone.longitude);
+            if (isPrivacyModeEnabled()) {
+                snprintf(buf, sizeof(buf), "Lng: **.**");
+            } else {
+                snprintf(buf, sizeof(buf), "Lng: %.6f", drone.longitude);
+            }
             u8g2.drawStr(0, 20, buf);
 
-            if (drone. altitude > INV_ALT) {
-                snprintf(buf, sizeof(buf), "Alt: %.1fm", drone.altitude);
+            if (drone.altitude > INV_ALT) {
+                if (isPrivacyModeEnabled()) {
+                    snprintf(buf, sizeof(buf), "Alt: **m");
+                } else {
+                    snprintf(buf, sizeof(buf), "Alt: %.1fm", drone.altitude);
+                }
             } else {
                 snprintf(buf, sizeof(buf), "Alt: N/A");
             }
@@ -1001,7 +1025,9 @@ static void drawDetail() {
         }
 
     } else if (detailPage == 2) {
-        snprintf(buf, sizeof(buf), "MAC: %s", drone.mac);
+        char maskedMAC[18];
+        maskMAC(drone.mac, maskedMAC);
+        snprintf(buf, sizeof(buf), "MAC: %s", maskedMAC);
         u8g2.drawStr(0, 10, buf);
 
         snprintf(buf, sizeof(buf), "Via: %s", drone.detectionMethod);
@@ -1015,24 +1041,38 @@ static void drawDetail() {
                  (drone.messagesSeen & (1<<4)) ? 'Y' : '-', // System
                  (drone.messagesSeen & (1<<5)) ? 'O' : '-'); // OperatorID
         u8g2.drawStr(0, 30, buf);
-        
+
     } else if (detailPage == 3) {
         if (drone.operatorId[0] && strcmp(drone.operatorId, "N/A") != 0) {
-            snprintf(buf, sizeof(buf), "Op:  %. 16s", drone.operatorId);
+            char maskedOperatorId[33];
+            maskName(drone.operatorId, maskedOperatorId, sizeof(maskedOperatorId) - 1);
+            snprintf(buf, sizeof(buf), "Op: %.16s", maskedOperatorId);
             u8g2.drawStr(0, 10, buf);
         } else {
             u8g2.drawStr(0, 10, "Op: N/A");
         }
 
         if (drone.operatorLatitude != 0 || drone.operatorLongitude != 0) {
-            snprintf(buf, sizeof(buf), "OpLat: %.6f", drone.operatorLatitude);
+            if (isPrivacyModeEnabled()) {
+                snprintf(buf, sizeof(buf), "OpLat: **.**");
+            } else {
+                snprintf(buf, sizeof(buf), "OpLat: %.6f", drone.operatorLatitude);
+            }
             u8g2.drawStr(0, 20, buf);
 
-            snprintf(buf, sizeof(buf), "OpLng: %.6f", drone.operatorLongitude);
+            if (isPrivacyModeEnabled()) {
+                snprintf(buf, sizeof(buf), "OpLng: **.**");
+            } else {
+                snprintf(buf, sizeof(buf), "OpLng: %.6f", drone.operatorLongitude);
+            }
             u8g2.drawStr(0, 30, buf);
 
-            if (drone. operatorAltitude > INV_ALT) {
-                snprintf(buf, sizeof(buf), "OpAlt: %.1fm", drone.operatorAltitude);
+            if (drone.operatorAltitude > INV_ALT) {
+                if (isPrivacyModeEnabled()) {
+                    snprintf(buf, sizeof(buf), "OpAlt: **m");
+                } else {
+                    snprintf(buf, sizeof(buf), "OpAlt: %.1fm", drone.operatorAltitude);
+                }
                 u8g2.drawStr(0, 40, buf);
             }
         } else {
@@ -1040,7 +1080,9 @@ static void drawDetail() {
         }
 
         if (drone.description[0] && strcmp(drone.description, "N/A") != 0) {
-            snprintf(buf, sizeof(buf), "Dsc: %.16s", drone. description);
+            char maskedDescription[33];
+            maskName(drone.description, maskedDescription, sizeof(maskedDescription) - 1);
+            snprintf(buf, sizeof(buf), "Dsc: %.16s", maskedDescription);
             u8g2.drawStr(0, 50, buf);
         } else {
             u8g2.drawStr(0, 50, "Dsc: N/A");
@@ -1069,11 +1111,19 @@ static void drawLocate() {
     u8g2.setFont(u8g2_font_5x8_tr);
     char buf[32];
 
-    const char *display_id = (drone.id[0] != '\0') ? drone.id : drone. mac;
-    snprintf(buf, sizeof(buf), "%.16s", display_id);
+    const char *display_id = (drone.id[0] != '\0') ? drone.id : drone.mac;
+    char maskedID[33];
+    if (drone.id[0] != '\0') {
+        maskName(drone.id, maskedID, sizeof(maskedID) - 1);
+    } else {
+        maskMAC(drone.mac, maskedID);
+    }
+    snprintf(buf, sizeof(buf), "%.16s", maskedID);
     u8g2.drawStr(0, 8, buf);
 
-    snprintf(buf, sizeof(buf), "%s", drone.mac);
+    char maskedMAC[18];
+    maskMAC(drone.mac, maskedMAC);
+    snprintf(buf, sizeof(buf), "%s", maskedMAC);
     u8g2.drawStr(0, 16, buf);
 
     u8g2.setFont(u8g2_font_7x13B_tr);

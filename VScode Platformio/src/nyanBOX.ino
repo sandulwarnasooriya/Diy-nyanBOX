@@ -583,6 +583,20 @@ void setup() {
 
   loadSleepTimeoutFromEEPROM();
 
+  uint8_t continuousScanValue = EEPROM.read(4);
+  if (continuousScanValue == 0xFF) {
+    continuousScanEnabled = true;
+  } else {
+    continuousScanEnabled = (continuousScanValue == 1);
+  }
+
+  uint8_t privacyModeValue = EEPROM.read(5);
+  if (privacyModeValue == 0xFF) {
+    privacyModeEnabled = false;
+  } else {
+    privacyModeEnabled = (privacyModeValue == 1);
+  }
+
   u8g2.begin();
   u8g2.setContrast(oledBrightness);
   u8g2.setBitmapMode(1);

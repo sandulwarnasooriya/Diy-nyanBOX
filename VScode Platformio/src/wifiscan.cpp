@@ -1058,10 +1058,14 @@ void wifiscanLoop() {
     u8g2.setFont(u8g2_font_5x8_tr);
     char buf[32];
 
-    snprintf(buf, sizeof(buf), "%.13s Ch:%d", net.ssid, locateTargetChannel);
+    char maskedSSID[33];
+    maskName(net.ssid, maskedSSID, sizeof(maskedSSID) - 1);
+    snprintf(buf, sizeof(buf), "%.13s Ch:%d", maskedSSID, locateTargetChannel);
     u8g2.drawStr(0, 8, buf);
 
-    snprintf(buf, sizeof(buf), "%s", net.bssid);
+    char maskedBSSID[18];
+    maskMAC(net.bssid, maskedBSSID);
+    snprintf(buf, sizeof(buf), "%s", maskedBSSID);
     u8g2.drawStr(0, 16, buf);
 
     u8g2.setFont(u8g2_font_7x13B_tr);
@@ -1111,10 +1115,14 @@ void wifiscanLoop() {
     u8g2.drawHLine(0, 12, 128);
 
     u8g2.setFont(u8g2_font_5x8_tr);
-    snprintf(buf, sizeof(buf), "Target: %s", deauthTargetClientMAC);
+    char maskedClientMAC[18];
+    maskMAC(deauthTargetClientMAC, maskedClientMAC);
+    snprintf(buf, sizeof(buf), "Target: %s", maskedClientMAC);
     u8g2.drawStr(0, 22, buf);
 
-    snprintf(buf, sizeof(buf), "AP: %.12s", net.ssid[0] ? net.ssid : "Unknown");
+    char maskedSSID[33];
+    maskName(net.ssid[0] ? net.ssid : "Unknown", maskedSSID, sizeof(maskedSSID) - 1);
+    snprintf(buf, sizeof(buf), "AP: %.12s", maskedSSID);
     u8g2.drawStr(0, 32, buf);
 
     snprintf(buf, sizeof(buf), "Channel: %d", deauthTargetChannel);
@@ -1131,7 +1139,9 @@ void wifiscanLoop() {
       u8g2.setFont(u8g2_font_5x8_tr);
       char buf[40];
 
-      snprintf(buf, sizeof(buf), "MAC: %s", client.clientMAC);
+      char maskedClientMAC[18];
+      maskMAC(client.clientMAC, maskedClientMAC);
+      snprintf(buf, sizeof(buf), "MAC: %s", maskedClientMAC);
       u8g2.drawStr(0, 8, buf);
 
       snprintf(buf, sizeof(buf), "RSSI: %d dBm  Pkts: %u", client.rssi, client.packetCount);
@@ -1158,7 +1168,9 @@ void wifiscanLoop() {
     u8g2.setFont(u8g2_font_5x8_tr);
     char buf[40];
 
-    snprintf(buf, sizeof(buf), "%.12s", net.ssid[0] ? net.ssid : "Unknown");
+    char maskedSSID[33];
+    maskName(net.ssid[0] ? net.ssid : "Unknown", maskedSSID, sizeof(maskedSSID) - 1);
+    snprintf(buf, sizeof(buf), "%.12s", maskedSSID);
     u8g2.drawStr(0, 8, buf);
 
     snprintf(buf, sizeof(buf), "Clients: %d/%d", net.clientCount, MAX_CLIENTS_PER_AP);
@@ -1182,7 +1194,9 @@ void wifiscanLoop() {
           u8g2.drawStr(0, y, ">");
         }
 
-        u8g2.drawStr(8, y, client.clientMAC);
+        char maskedClientMAC[18];
+        maskMAC(client.clientMAC, maskedClientMAC);
+        u8g2.drawStr(8, y, maskedClientMAC);
 
         if (client.packetCount >= 1000) {
           float pkts = client.packetCount / 1000.0;
@@ -1200,10 +1214,14 @@ void wifiscanLoop() {
     u8g2.setFont(u8g2_font_5x8_tr);
     char buf[40];
 
-    snprintf(buf, sizeof(buf), "SSID: %s", net.ssid);
+    char maskedSSID[33];
+    maskName(net.ssid, maskedSSID, sizeof(maskedSSID) - 1);
+    snprintf(buf, sizeof(buf), "SSID: %s", maskedSSID);
     u8g2.drawStr(0, 10, buf);
 
-    snprintf(buf, sizeof(buf), "BSSID: %s", net.bssid);
+    char maskedBSSID[18];
+    maskMAC(net.bssid, maskedBSSID);
+    snprintf(buf, sizeof(buf), "BSSID: %s", maskedBSSID);
     u8g2.drawStr(0, 20, buf);
 
     snprintf(buf, sizeof(buf), "RSSI: %d dBm", net.rssi);
@@ -1221,7 +1239,7 @@ void wifiscanLoop() {
     char header[32];
     snprintf(header, sizeof(header), "WiFi: %d/%d", (int)wifiNetworks.size(), MAX_NETWORKS);
     u8g2.drawStr(0, 10, header);
-    
+
     for (int i = 0; i < 5; ++i) {
       int idx = listStartIndex + i;
       if (idx >= (int)wifiNetworks.size())
@@ -1230,8 +1248,10 @@ void wifiscanLoop() {
       if (idx == currentIndex)
         u8g2.drawStr(0, 20 + i * 10, ">");
       char line[32];
+      char maskedSSID[33];
+      maskName(n.ssid[0] ? n.ssid : "Unknown", maskedSSID, sizeof(maskedSSID) - 1);
       snprintf(line, sizeof(line), "%.8s | RSSI %d",
-               n.ssid[0] ? n.ssid : "Unknown", n.rssi);
+               maskedSSID, n.rssi);
       u8g2.drawStr(10, 20 + i * 10, line);
     }
   }
