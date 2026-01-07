@@ -28,5 +28,6 @@ bool isPrivacyModeEnabled();
 
 void maskMAC(const char* original, char* masked);
 void maskName(const char* original, char* masked, int maxLen);
+void maskNameEvilPortal(const char* original, char* masked, int maxLen, const char* customSSIDs[], int customSSIDCount);
 
 #endif

@@ -22,10 +22,16 @@
 
 extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
 
+const char* customSSIDs[] = {
+    "Free WiFi", "Guest", "Hotel WiFi", "Airport WiFi",
+    "Starbucks", "McDonald's WiFi", "Public WiFi", "Open Network"
+};
+const int customSSIDCount = sizeof(customSSIDs) / sizeof(customSSIDs[0]);
+
 namespace {
 
-enum EvilPortalState { 
-    PORTAL_MENU, 
+enum EvilPortalState {
+    PORTAL_MENU,
     PORTAL_RUNNING,
     PORTAL_VIEW_CREDS,
     PORTAL_SCANNING
@@ -74,12 +80,6 @@ static String lastCurrentSSID = "";
 static int lastCurrentTemplate = -1;
 static unsigned long lastStatusUpdate = 0;
 const unsigned long statusUpdateInterval = 1000;
-
-const char* customSSIDs[] = {
-    "Free WiFi", "Guest", "Hotel WiFi", "Airport WiFi",
-    "Starbucks", "McDonald's WiFi", "Public WiFi", "Open Network"
-};
-const int customSSIDCount = sizeof(customSSIDs) / sizeof(customSSIDs[0]);
 
 WebServer portalServer(80);
 DNSServer portalDNS;
@@ -469,7 +469,7 @@ void drawPortalMenu() {
                     selected ? ">" : " ", templateNames[currentTemplate]);
         } else if (i == 2) {
             char maskedSSID[33];
-            maskName(currentSSID.c_str(), maskedSSID, sizeof(maskedSSID) - 1);
+            maskNameEvilPortal(currentSSID.c_str(), maskedSSID, sizeof(maskedSSID) - 1, customSSIDs, customSSIDCount);
             char truncatedSSID[16];
             if (strlen(maskedSSID) > 12) {
                 strncpy(truncatedSSID, maskedSSID, 12);
@@ -503,7 +503,7 @@ void drawPortalStatus() {
     u8g2.setFont(u8g2_font_5x8_tr);
     u8g2.drawStr(0, 10, "Portal Running");
     char maskedSSID[33];
-    maskName(currentSSID.c_str(), maskedSSID, sizeof(maskedSSID) - 1);
+    maskNameEvilPortal(currentSSID.c_str(), maskedSSID, sizeof(maskedSSID) - 1, customSSIDs, customSSIDCount);
     char ssidStr[22];
     if (strlen(maskedSSID) > 18) {
         strncpy(ssidStr, maskedSSID, 16);
@@ -546,7 +546,7 @@ void drawCredentialsList() {
         const Credential& cred = capturedCreds[credIndex];
 
         char maskedSSIDFull[33];
-        maskName(cred.ssid.c_str(), maskedSSIDFull, sizeof(maskedSSIDFull) - 1);
+        maskNameEvilPortal(cred.ssid.c_str(), maskedSSIDFull, sizeof(maskedSSIDFull) - 1, customSSIDs, customSSIDCount);
         char ssidStr[22];
         if (strlen(maskedSSIDFull) > 20) {
             strncpy(ssidStr, maskedSSIDFull, 18);

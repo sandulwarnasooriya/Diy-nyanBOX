@@ -384,6 +384,12 @@ void maskMAC(const char* original, char* masked) {
     return;
   }
 
+  // Exclude generic placeholder MAC from masking
+  if (strcmp(original, "N/A") == 0) {
+    strcpy(masked, original);
+    return;
+  }
+
   strncpy(masked, original, 8);
   masked[8] = '\0';
 
@@ -397,6 +403,55 @@ void maskName(const char* original, char* masked, int maxLen) {
       masked[maxLen] = '\0';
     }
     return;
+  }
+
+  // Exclude generic placeholder names from masking
+  if (strcmp(original, "Unknown") == 0 ||
+      strcmp(original, "Hidden") == 0 ||
+      strcmp(original, "N/A") == 0 ||
+      strcmp(original, "AirTag") == 0 ||
+      strcmp(original, "Axon Device") == 0 ||
+      strcmp(original, "Flipper Zero") == 0 ||
+      strcmp(original, "MeshCore") == 0 ||
+      strcmp(original, "Meshtastic") == 0 ||
+      strcmp(original, "Tile") == 0 ||
+      strcmp(original, "Flock Device") == 0) {
+    strncpy(masked, original, maxLen);
+    masked[maxLen] = '\0';
+    return;
+  }
+
+  int len = strlen(original);
+  if (len == 0) {
+    masked[0] = '\0';
+    return;
+  }
+
+  masked[0] = original[0];
+
+  int asterisks = min(len - 1, maxLen - 1);
+  for (int i = 1; i <= asterisks; i++) {
+    masked[i] = '*';
+  }
+  masked[asterisks + 1] = '\0';
+}
+
+void maskNameEvilPortal(const char* original, char* masked, int maxLen, const char* customSSIDs[], int customSSIDCount) {
+  if (!privacyModeEnabled || original == nullptr || masked == nullptr) {
+    if (original && masked) {
+      strncpy(masked, original, maxLen);
+      masked[maxLen] = '\0';
+    }
+    return;
+  }
+
+  // Exclude custom SSIDs from masking in Evil Portal
+  for (int i = 0; i < customSSIDCount; i++) {
+    if (strcmp(original, customSSIDs[i]) == 0) {
+      strncpy(masked, original, maxLen);
+      masked[maxLen] = '\0';
+      return;
+    }
   }
 
   int len = strlen(original);
