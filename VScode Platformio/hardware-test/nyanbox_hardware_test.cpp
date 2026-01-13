@@ -16,7 +16,7 @@
 #include <Adafruit_NeoPixel.h>
 #include "../include/pindefs.h"
 
-const char* VERSION = "v1.0";
+const char* VERSION = "v1.1";
 
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 Adafruit_NeoPixel pixels(1, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
@@ -40,13 +40,13 @@ void displayTest() {
     u8g2.drawStr(20, 38, "HW TEST ");
     u8g2.drawStr(70, 38, VERSION);
     u8g2.sendBuffer();
-    delay(2000);
+    delay(800);
 
     // Full white screen
     u8g2.clearBuffer();
     u8g2.drawBox(0, 0, 128, 64);
     u8g2.sendBuffer();
-    delay(2000);
+    delay(500);
 
     // Simple alternating pattern
     u8g2.clearBuffer();
@@ -57,7 +57,7 @@ void displayTest() {
         }
     }
     u8g2.sendBuffer();
-    delay(2000);
+    delay(500);
 
     // Lines test
     u8g2.clearBuffer();
@@ -68,7 +68,7 @@ void displayTest() {
     u8g2.drawVLine(64, 0, 64);
     u8g2.drawVLine(96, 0, 64);
     u8g2.sendBuffer();
-    delay(2000);
+    delay(500);
 
     // Border and corners
     u8g2.clearBuffer();
@@ -79,12 +79,12 @@ void displayTest() {
     u8g2.drawBox(0, 54, 10, 10);
     u8g2.drawBox(118, 54, 10, 10);
     u8g2.sendBuffer();
-    delay(2000);
+    delay(500);
 }
 
 void setup() {
     Serial.begin(115200);
-    delay(1000);
+    delay(100);
 
     Serial.println("");
     Serial.println("========================================");
@@ -150,7 +150,7 @@ void loop() {
         colorStep = (colorStep + 1) % 510;
     }
 
-    if (!testingComplete && millis() - lastPhaseTime > 3000) {
+    if (!testingComplete && millis() - lastPhaseTime > 250) {
         lastPhaseTime = millis();
 
         int radioIndex = testPhase - 1;
@@ -253,7 +253,7 @@ void loop() {
                             break;
                     }
                     u8g2.sendBuffer();
-                    delay(500);
+                    delay(300);
 
                     u8g2.clearBuffer();
                     u8g2.setFont(u8g2_font_helvB12_tr);
