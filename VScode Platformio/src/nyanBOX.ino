@@ -60,6 +60,7 @@
 #include "../include/axon_detector.h"
 #include "../include/drone_detector.h"
 #include "../include/flock_detector.h"
+#include "../include/device_scout.h"
 #include "../include/pineapple_detector.h"
 #include "../include/display_mirror.h"
 
@@ -209,6 +210,7 @@ int getXPAmount(const char* appName) {
 bool isReconApp(const char* appName) {
   return strstr(appName, "Scan") != nullptr || 
          strstr(appName, "Detector") != nullptr ||
+         strstr(appName, "Scout") != nullptr ||
          strstr(appName, "Analyzer") != nullptr;
 }
 
@@ -461,6 +463,7 @@ MenuItem otherMenu[] = {
   { "SigKill",   nullptr, sigkillSetup,   sigkillLoop,   cleanupRadio },
   { "Drone Detector", nullptr, droneDetectorSetup, droneDetectorLoop, cleanupDroneDetector },
   { "Flock Detector", nullptr, flockDetectorSetup, flockDetectorLoop, cleanupFlockDetector },
+  { "Device Scout", nullptr, deviceScoutSetup, deviceScoutLoop, cleanupDeviceScout },
   { "Scanner",      nullptr, scannerSetup,    scannerLoop,    cleanupRadio },
   { "Analyzer",     nullptr, analyzerSetup,   analyzerLoop,   cleanupRadio },
   { "Setting",      nullptr, settingSetup,    settingLoop,    noCleanup },
