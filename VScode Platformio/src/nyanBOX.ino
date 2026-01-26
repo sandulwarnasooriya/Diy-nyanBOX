@@ -41,6 +41,7 @@
 #include "../include/airtag_detector.h"
 #include "../include/airtag_spoofer.h"
 #include "../include/tile_detector.h"
+#include "../include/rayban_detector.h"
 #include "../include/wifiscan.h"
 #include "../include/deauth.h"
 #include "../include/deauth_scanner.h"
@@ -450,6 +451,7 @@ MenuItem bleMenu[] = {
   { "AirTag Detector", nullptr, airtagDetectorSetup,   airtagDetectorLoop,      cleanupBLE },
   { "AirTag Spoofer", nullptr, airtagSpooferSetup,     airtagSpooferLoop,       cleanupBLE },
   { "Tile Detector", nullptr, tileDetectorSetup,     tileDetectorLoop,       cleanupBLE },
+  { "RayBan Detector", nullptr, raybanDetectorSetup, raybanDetectorLoop, cleanupBLE },
   { "BLE Spammer",  nullptr, bleSpamSetup,             bleSpamLoop,             cleanupBLE },
   { "Swift Pair",   nullptr, swiftpairSpamSetup,       swiftpairSpamLoop,       cleanupBLE },
   { "Sour Apple",   nullptr, sourappleSetup,           sourappleLoop,           cleanupBLE },

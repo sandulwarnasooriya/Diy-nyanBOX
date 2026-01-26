@@ -415,6 +415,7 @@ void maskName(const char* original, char* masked, int maxLen) {
       strcmp(original, "MeshCore") == 0 ||
       strcmp(original, "Meshtastic") == 0 ||
       strcmp(original, "Tile") == 0 ||
+      strcmp(original, "RayBan Device") == 0 ||
       strcmp(original, "Flock Device") == 0) {
     strncpy(masked, original, maxLen);
     masked[maxLen] = '\0';
