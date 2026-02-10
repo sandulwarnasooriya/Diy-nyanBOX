@@ -94,7 +94,7 @@ void scanChannels(void) {
     }
 
     // Average the accumulated values for this channel
-    channel[i] = (channel[i] * 100) / samplesPerChannel; // Convert to percentage
+    channel[i] = (channel[i] * 100) / samplesPerChannel; // Convert to a percentage
   }
 }
 
@@ -122,8 +122,8 @@ void outputChannels(void) {
   u8g2.drawLine(127, 0, 127, 63);
 
   for (byte count = 0; count < 64; count += 10) {
-    u8g2.drawLine(127, count, 122, count); // Right side markers
-    u8g2.drawLine(0, count, 5, count);    // Left side markers
+    u8g2.drawLine(127, count, 122, count); // Right-side markers
+    u8g2.drawLine(0, count, 5, count);    // Left-side markers
   }
 
   for (byte count = 10; count < 127; count += 10) {
@@ -131,7 +131,7 @@ void outputChannels(void) {
     u8g2.drawPixel(count, 63);
   }
 
-  // Draw the graph moving right-to-left
+  // Draw the graph moving right to left
   for (byte count = 0; count < 127; count++) {
     u8g2.drawLine(127 - count, 63, 127 - count, 63 - sensorArray[count]);
   }

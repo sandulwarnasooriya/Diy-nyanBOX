@@ -35,15 +35,15 @@ const int numChannels = sizeof(channels) / sizeof(channels[0]);
 
 // Beacon frame template
 const uint8_t beacon_frame_template[] = {
-    0x80, 0x00,                                     // Frame Control
+    0x80, 0x00,                                     // Frame control
     0x00, 0x00,                                     // Duration
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff,             // Destination Address (Broadcast)
-    0xde, 0xad, 0xbe, 0xef, 0xde, 0xad,             // Source Address (SA)
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff,             // Destination address (broadcast)
+    0xde, 0xad, 0xbe, 0xef, 0xde, 0xad,             // Source address (SA)
     0xde, 0xad, 0xbe, 0xef, 0xde, 0xad,             // BSSID
-    0x00, 0x00,                                     // Sequence/Fragment number
+    0x00, 0x00,                                     // Sequence/fragment number
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Timestamp
     0x64, 0x00,                                     // Beacon interval
-    0x11, 0x04                                      // Capability info
+    0x11, 0x04                                      // Capability information
 };
 
 const char* faces[] = {

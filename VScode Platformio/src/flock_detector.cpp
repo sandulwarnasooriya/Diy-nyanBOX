@@ -47,7 +47,7 @@ static std::vector<FlockDeviceData> flockDevices;
 
 const int MAX_DEVICES = 100;
 
-// WiFi SSID patterns
+// Wi-Fi SSID patterns
 const char* wifi_ssid_patterns[] = {
     "flock", "Flock", "FLOCK",
     "FS Ext Battery",
@@ -61,7 +61,7 @@ const char* mac_prefixes[] = {
     // FS Ext Battery devices
     "58:8e:81", "cc:cc:cc", "ec:1b:bd", "90:35:ea", "04:0d:84",
     "f0:82:c0", "1c:34:f1", "38:5b:44", "94:34:69", "b4:e3:f9",
-    // Flock WiFi devices
+    // Flock Wi-Fi devices
     "70:c9:4e", "3c:91:80", "d8:f3:bc", "80:30:49", "14:5a:fc",
     "74:4c:a1", "08:3a:88", "9c:2f:9d", "94:08:53", "e4:aa:ea"
 };
