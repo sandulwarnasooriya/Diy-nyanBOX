@@ -384,7 +384,7 @@ void maskMAC(const char* original, char* masked) {
     return;
   }
 
-  // Exclude generic placeholder MAC from masking
+  // Exclude generic placeholder MAC addresses from masking
   if (strcmp(original, "N/A") == 0) {
     strcpy(masked, original);
     return;

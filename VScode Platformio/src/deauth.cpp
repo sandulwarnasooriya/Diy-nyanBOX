@@ -59,7 +59,7 @@ static uint16_t lastScanCount = 0;
 static unsigned long lastScanUpdate = 0;
 const unsigned long scanUpdateInterval = 100;
 
-// Modify to whitelist network SSIDs
+// Modified to whitelist network SSIDs
 const char *ssidWhitelist[] = {
     "whitelistExample1", 
     "whitelistExample2"
