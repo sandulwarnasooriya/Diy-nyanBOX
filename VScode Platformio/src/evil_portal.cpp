@@ -727,6 +727,26 @@ void evilPortalLoop() {
                 needsRedraw = true;
                 delay(200);
             }
+            if (leftNow && !leftPressed) {
+                switch (menuSelection) {
+                    case 1:
+                        currentTemplate = (currentTemplate - 1 + numTemplates) % numTemplates;
+                        needsRedraw = true;
+                        break;
+                    case 2:
+                        if (!scannedSSIDs.empty()) {
+                            currentSSIDIndex = (currentSSIDIndex - 1 + scannedSSIDs.size()) % scannedSSIDs.size();
+                            currentSSID = scannedSSIDs[currentSSIDIndex];
+                        } else {
+                            static int ssidIndexL = 0;
+                            ssidIndexL = (ssidIndexL - 1 + customSSIDCount) % customSSIDCount;
+                            currentSSID = String(customSSIDs[ssidIndexL]);
+                        }
+                        needsRedraw = true;
+                        break;
+                }
+                delay(200);
+            }
             if (rightNow && !rightPressed) {
                 switch (menuSelection) {
                     case 0:

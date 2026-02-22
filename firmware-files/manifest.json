@@ -1,6 +1,6 @@
 {
   "name": "nyanBOX",
-  "version": "v4.20.8",
+  "version": "v4.20.9",
   "home_assistant_domain": "esphome",
   "funding_url": "https://shop.nyandevices.com",
   "new_install_prompt_erase": true,
