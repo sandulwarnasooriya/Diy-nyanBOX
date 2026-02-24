@@ -768,7 +768,10 @@ void loop() {
 
   if (justPressed(BUTTON_LEFT, leftPrev, leftDebounceTime)) {
     updateLastActivity();
-    if (currentState == APP_LEVEL) {
+    if (currentState == APP_LEVEL ||
+        currentState == APP_BLE   ||
+        currentState == APP_WIFI  ||
+        currentState == APP_OTHER) {
       enterMenu(APP_MAIN);
     }
   }
