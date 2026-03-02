@@ -1,7 +1,7 @@
 /*
     nyanBOX by Nyan Devices
     https://github.com/jbohack/nyanBOX
-    Copyright (c) 2025 jbohack
+    Copyright (c) 2026 jbohack
 
     Licensed under the MIT License
     https://opensource.org/licenses/MIT
@@ -15,7 +15,7 @@
 #include <U8g2lib.h>
 #include "pindefs.h"
 
-#define NYANBOX_VERSION "v4.20.10"
+#define NYANBOX_VERSION "v4.21.10"
 extern const char* nyanboxVersion;
 
 void aboutSetup();

@@ -1,7 +1,7 @@
 /*
     nyanBOX by Nyan Devices
     https://github.com/jbohack/nyanBOX
-    Copyright (c) 2025 jbohack
+    Copyright (c) 2026 jbohack
 
     Licensed under the MIT License
     https://opensource.org/licenses/MIT
@@ -65,6 +65,7 @@
 #include "../include/device_scout.h"
 #include "../include/pineapple_detector.h"
 #include "../include/display_mirror.h"
+#include "../include/password.h"
 
 RF24 radios[] = {
   RF24(RADIO_CE_PIN_1, RADIO_CSN_PIN_1),
@@ -665,11 +666,13 @@ void setup() {
   pinMode(BUTTON_PIN_LEFT, INPUT_PULLUP);
 
   levelSystemSetup();
-  enterMenu(APP_MAIN);
 
   initNyanboxAdvertiser();
   startNyanboxAdvertiser();
 
+  if (passwordEnabled()) { checkPasswordOnBoot(); }
+
+  enterMenu(APP_MAIN);
   displayMirrorSetup();
 }
 

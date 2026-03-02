@@ -1,7 +1,7 @@
 /*
     nyanBOX by Nyan Devices
     https://github.com/jbohack/nyanBOX
-    Copyright (c) 2025 jbohack
+    Copyright (c) 2026 jbohack
 
     Licensed under the MIT License
     https://opensource.org/licenses/MIT
@@ -19,6 +19,7 @@
 #include "../include/level_system.h"
 #include "../include/legal_disclaimer.h"
 #include "../include/pindefs.h"
+#include "../include/password.h"
 
 extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
 
@@ -29,7 +30,7 @@ extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
 #define EEPROM_ADDRESS_PRIVACY_MODE 5
 
 int currentSetting = 0;
-int totalSettings = 7;
+int totalSettings = 8;
 bool neoPixelActive = true;
 uint8_t oledBrightness = 100;
 extern bool dangerousActionsEnabled;
@@ -233,6 +234,16 @@ void settingLoop() {
             break;
 
           case 6:
+            if (passwordEnabled()) {
+              clearPassword();
+              needsRedraw = true;
+            } else {
+              setPasswordInSettings();
+              needsRedraw = true;
+            }
+            break;
+
+          case 7:
             showResetConfirm = true;
             needsRedraw = true;
             break;
@@ -350,6 +361,10 @@ void settingLoop() {
           u8g2.drawStr(85, yPos, privacyModeEnabled ? "On" : "Off");
           break;
         case 6:
+          u8g2.drawStr(10, yPos, "Password:");
+          u8g2.drawStr(85, yPos, passwordEnabled() ? "On" : "Off");
+          break;
+        case 7:
           u8g2.drawStr(10, yPos, "Reset XP:");
           char lvlStr[8];
           sprintf(lvlStr, "Lv%d", getCurrentLevel());
