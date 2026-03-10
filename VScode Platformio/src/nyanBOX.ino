@@ -32,6 +32,7 @@
 #include "../include/sourapple.h"
 #include "../include/sourdroid.h"
 #include "../include/blescan.h"
+#include "../include/ble_inspector.h"
 #include "../include/ble_spammer.h"
 #include "../include/ble_spoofer.h"
 #include "../include/swiftpair.h"
@@ -214,7 +215,8 @@ bool isReconApp(const char* appName) {
   return strstr(appName, "Scan") != nullptr || 
          strstr(appName, "Detector") != nullptr ||
          strstr(appName, "Scout") != nullptr ||
-         strstr(appName, "Analyzer") != nullptr;
+         strstr(appName, "Analyzer") != nullptr ||
+         strstr(appName, "Inspect") != nullptr;
 }
 
 bool isDangerousApp(const char* appName) {
@@ -444,6 +446,7 @@ constexpr int WIFI_MENU_SIZE = sizeof(wifiMenu) / sizeof(wifiMenu[0]);
 
 MenuItem bleMenu[] = {
   { "BLE Scan",     nullptr, blescanSetup,             blescanLoop,             cleanupBLE },
+  { "BLE Inspector",   nullptr, bleInspectorSetup,            bleInspectorLoop,            cleanupBLE },
   { "nyanBOX Detector", nullptr, nyanboxDetectorSetup,         nyanboxDetectorLoop,         cleanupBLE },
   { "Flipper Zero Detector", nullptr, flipperZeroDetectorSetup, flipperZeroDetectorLoop, cleanupBLE },
   { "Axon Detector", nullptr, axonDetectorSetup, axonDetectorLoop, cleanupBLE },

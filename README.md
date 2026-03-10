@@ -72,6 +72,7 @@ Built around an ESP32 with triple NRF24 modules, a crisp OLED display, and a 250
 
 ### 🔵 Bluetooth (BLE) Tools
 - **BLE Scanner** – Detects nearby BLE devices
+- **BLE Inspector** – Decodes raw BLE advertising packets from nearby devices, displaying service UUIDs, manufacturer data, TX power, flags, and raw payloads.
 - **nyanBOX Detector** – Discovers nearby nyanBOX devices and displays their information including level, version, and signal strength.
 - **Flipper Scanner** – Detects nearby Flipper Zero devices
 - **Axon Detector** – Detects nearby Axon devices (body cameras, tasers, and other law enforcement equipment)
