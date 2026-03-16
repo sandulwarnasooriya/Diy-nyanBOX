@@ -425,6 +425,7 @@ void maskName(const char* original, char* masked, int maxLen) {
       strcmp(original, "Hidden") == 0 ||
       strcmp(original, "N/A") == 0 ||
       strcmp(original, "AirTag") == 0 ||
+      strcmp(original, "SmartTag") == 0 ||
       strcmp(original, "Axon Device") == 0 ||
       strcmp(original, "Flipper Zero") == 0 ||
       strcmp(original, "MeshCore") == 0 ||
