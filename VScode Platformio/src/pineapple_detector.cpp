@@ -10,6 +10,7 @@
 */
 
 #include "../include/pineapple_detector.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include "../include/setting.h"
@@ -287,22 +288,7 @@ void pineappleDetectorSetup() {
     u8g2.begin();
     u8g2.setFont(u8g2_font_6x10_tr);
 
-    wifi_mode_t currentMode;
-    if (esp_wifi_get_mode(&currentMode) == ESP_OK) {
-        esp_wifi_disconnect();
-        esp_wifi_stop();
-        wifiInitialized = true;
-    } else {
-        wifiInitialized = false;
-    }
-
-    if (!wifiInitialized) {
-        wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-        esp_wifi_init(&cfg);
-    }
-
-    esp_wifi_set_mode(WIFI_MODE_STA);
-    esp_wifi_start();
+    initWiFi(WIFI_MODE_STA);
     esp_wifi_set_ps(WIFI_PS_NONE);
     esp_wifi_set_promiscuous(true);
     esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler);

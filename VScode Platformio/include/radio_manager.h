@@ -9,17 +9,13 @@
     SPDX-License-Identifier: MIT
 */
 
-#ifndef ABOUT_H
-#define ABOUT_H
+#pragma once
 
-#include <U8g2lib.h>
-#include "pindefs.h"
+#include "esp_wifi.h"
+#include "esp_bt_main.h"
 
-#define NYANBOX_VERSION "v4.24.11"
-extern const char* nyanboxVersion;
-
-void aboutSetup();
-void aboutLoop();
-void aboutCleanup();
-
-#endif
+bool initBLE();
+void cleanupBLE();
+bool initWiFi(wifi_mode_t mode);
+void cleanupWiFi();
+void cleanupRadio();

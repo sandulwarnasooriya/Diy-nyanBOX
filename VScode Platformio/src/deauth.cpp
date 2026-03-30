@@ -10,6 +10,7 @@
 */
 
 #include "../include/deauth.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/pindefs.h"
 #include "../include/display_mirror.h"
@@ -310,10 +311,7 @@ void drawDeauthSingle() {
 }
 
 void deauthSetup() {
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    esp_wifi_init(&cfg);
-    esp_wifi_set_mode(WIFI_MODE_APSTA);
-    esp_wifi_start();
+    initWiFi(WIFI_MODE_APSTA);
 
     esp_wifi_set_promiscuous(true);
     

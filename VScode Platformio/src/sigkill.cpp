@@ -11,6 +11,7 @@
 
 #include <Arduino.h>
 #include "../include/sigkill.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include "../include/icon.h"
@@ -137,38 +138,7 @@ static void drawActiveJamming(const char* protocolName) {
 void sigkillSetup() {
   Serial.begin(115200);
 
-  esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-  if (bt_state == ESP_BLUEDROID_STATUS_ENABLED) {
-      esp_bluedroid_disable();
-      delay(50);
-  }
-  if (bt_state != ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-      esp_bluedroid_deinit();
-      delay(50);
-  }
-
-  if (btStarted()) {
-      btStop();
-      delay(50);
-  }
-
-  wifi_mode_t mode;
-  if (esp_wifi_get_mode(&mode) == ESP_OK) {
-      esp_wifi_stop();
-      delay(50);
-      esp_wifi_deinit();
-      delay(100);
-  }
-
-  esp_netif_t* sta_netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-  if (sta_netif != NULL) {
-      esp_netif_destroy(sta_netif);
-  }
-
-  esp_netif_t* ap_netif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
-  if (ap_netif != NULL) {
-      esp_netif_destroy(ap_netif);
-  }
+  cleanupRadio();
 
   pinMode(BUTTON_PIN_UP, INPUT_PULLUP);
   pinMode(BUTTON_PIN_DOWN, INPUT_PULLUP);

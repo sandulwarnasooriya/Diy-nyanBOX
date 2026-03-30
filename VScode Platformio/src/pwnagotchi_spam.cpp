@@ -10,6 +10,7 @@
 */
 
 #include "../include/pwnagotchi_spam.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include "esp_wifi.h"
@@ -192,23 +193,7 @@ void sendPwnagotchiBeacon(uint8_t channel, const char* face, const char* name) {
 }
 
 void pwnagotchiSpamSetup() {
-    wifi_mode_t currentWifiMode;
-    if (esp_wifi_get_mode(&currentWifiMode) == ESP_OK) {
-        esp_wifi_disconnect();
-        esp_wifi_stop();
-        wifiInitialized = true;
-    } else {
-        wifiInitialized = false;
-    }
-
-    if (!wifiInitialized) {
-        wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-        esp_wifi_init(&cfg);
-    }
-
-    esp_wifi_set_storage(WIFI_STORAGE_RAM);
-    esp_wifi_set_mode(WIFI_MODE_AP);
-    esp_wifi_start();
+    initWiFi(WIFI_MODE_AP);
 
     spamActive = false;
     beaconsSent = 0;

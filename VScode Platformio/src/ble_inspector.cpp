@@ -10,6 +10,7 @@
 */
 
 #include "../include/ble_inspector.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include "../include/setting.h"
@@ -640,10 +641,7 @@ void bleInspectorSetup() {
     u8g2.sendBuffer();
     displayMirrorSend(u8g2);
 
-    if (!btStarted()) btStart();
-    esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-    if (bt_state == ESP_BLUEDROID_STATUS_UNINITIALIZED) esp_bluedroid_init();
-    if (bt_state != ESP_BLUEDROID_STATUS_ENABLED)       esp_bluedroid_enable();
+    initBLE();
 
     esp_ble_gap_register_callback(ble_inspector_gap_cb);
     esp_ble_gap_set_scan_params(&ble_inspector_scan_params);

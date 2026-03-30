@@ -10,6 +10,7 @@
 */
 
 #include "../include/deauth_scanner.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/pindefs.h"
 #include "../include/display_mirror.h"
@@ -97,11 +98,7 @@ void packetSniffer(void *buf, wifi_promiscuous_pkt_type_t type) {
 }
 
 void deauthScannerSetup() {
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    esp_wifi_init(&cfg);
-    esp_wifi_set_mode(WIFI_MODE_STA);
-    esp_wifi_set_storage(WIFI_STORAGE_RAM);
-    esp_wifi_start();
+    initWiFi(WIFI_MODE_STA);
 
     wifi_promiscuous_filter_t filter = {
         .filter_mask = WIFI_PROMIS_FILTER_MASK_MGMT

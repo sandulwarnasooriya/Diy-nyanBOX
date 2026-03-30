@@ -11,6 +11,7 @@
 
 #include "../include/pindefs.h"
 #include "../include/swiftpair.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include <U8g2lib.h>
@@ -266,17 +267,7 @@ void swiftpairSpamSetup() {
     pinMode(BUTTON_PIN_RIGHT, INPUT_PULLUP);
     pinMode(BUTTON_PIN_LEFT, INPUT_PULLUP);
 
-    if (!btStarted()) {
-        btStart();
-    }
-
-    esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-    if (bt_state == ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-        esp_bluedroid_init();
-    }
-    if (bt_state != ESP_BLUEDROID_STATUS_ENABLED) {
-        esp_bluedroid_enable();
-    }
+    initBLE();
 
     esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_DEFAULT, ESP_PWR_LVL_P9);
     esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);

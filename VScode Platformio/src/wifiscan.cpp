@@ -10,6 +10,7 @@
 */
 
 #include "../include/wifiscan.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include "../include/setting.h"
@@ -493,10 +494,7 @@ void wifiscanSetup() {
   u8g2.sendBuffer();
   displayMirrorSend(u8g2);
 
-  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-  esp_wifi_init(&cfg);
-  esp_wifi_set_mode(WIFI_MODE_STA);
-  esp_wifi_start();
+  initWiFi(WIFI_MODE_STA);
   
   pinMode(BTN_UP, INPUT_PULLUP);
   pinMode(BTN_DOWN, INPUT_PULLUP);

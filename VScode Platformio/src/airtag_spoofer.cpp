@@ -10,6 +10,7 @@
 */
 
 #include "../include/airtag_spoofer.h"
+#include "../include/radio_manager.h"
 #include "../include/airtag_detector.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
@@ -168,18 +169,7 @@ void drawCloneAllRunning() {
 
 void initializeAdvertising() {
   if (!bleInitialized) {
-    if (!btStarted()) {
-      btStart();
-    }
-
-    esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-    if (bt_state == ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-      esp_bluedroid_init();
-    }
-    if (bt_state != ESP_BLUEDROID_STATUS_ENABLED) {
-      esp_bluedroid_enable();
-    }
-
+    initBLE();
     bleInitialized = true;
   }
 }

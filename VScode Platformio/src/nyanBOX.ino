@@ -68,6 +68,7 @@
 #include "../include/pineapple_detector.h"
 #include "../include/display_mirror.h"
 #include "../include/password.h"
+#include "../include/radio_manager.h"
 
 RF24 radios[] = {
   RF24(RADIO_CE_PIN_1, RADIO_CSN_PIN_1),
@@ -352,74 +353,6 @@ void updateAppXP() {
 
 void enterMenu(AppMenuState st);
 void runApp(MenuItem &mi);
-
-void cleanupWiFi() {
-  wifi_mode_t mode;
-  if (esp_wifi_get_mode(&mode) == ESP_OK) {
-    esp_wifi_stop();
-    delay(50);
-    esp_wifi_deinit();
-    delay(100);
-  }
-
-  esp_netif_t* sta_netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-  if (sta_netif != NULL) {
-    esp_netif_destroy(sta_netif);
-  }
-
-  esp_netif_t* ap_netif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
-  if (ap_netif != NULL) {
-    esp_netif_destroy(ap_netif);
-  }
-
-  delay(100);
-}
-
-void cleanupRadio() {
-  for (auto &r : radios) r.powerDown();
-
-  wifi_mode_t mode;
-  if (esp_wifi_get_mode(&mode) == ESP_OK) {
-    esp_wifi_stop();
-    delay(50);
-    esp_wifi_deinit();
-    delay(100);
-  }
-
-  esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-  if (bt_state == ESP_BLUEDROID_STATUS_ENABLED) {
-    esp_bluedroid_disable();
-    delay(50);
-  }
-  if (bt_state != ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-    esp_bluedroid_deinit();
-    delay(50);
-  }
-  
-  if (btStarted()) {
-    btStop();
-    delay(50);
-  }
-}
-
-void cleanupBLE() {
-  delay(100);
-
-  esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-  if (bt_state == ESP_BLUEDROID_STATUS_ENABLED) {
-    esp_bluedroid_disable();
-    delay(50);
-  }
-  if (bt_state != ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-    esp_bluedroid_deinit();
-    delay(50);
-  }
-  
-  if (btStarted()) {
-    btStop();
-    delay(50);
-  }
-}
 
 void noCleanup() {
 }

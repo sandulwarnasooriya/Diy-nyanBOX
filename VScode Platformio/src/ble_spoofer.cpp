@@ -10,6 +10,7 @@
 */
 
 #include "../include/ble_spoofer.h"
+#include "../include/radio_manager.h"
 #include "../include/blescan.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
@@ -176,18 +177,7 @@ static void drawCloneAllRunning() {
 
 static void initializeAdvertising() {
   if (!bleInitialized) {
-    if (!btStarted()) {
-      btStart();
-    }
-
-    esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-    if (bt_state == ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-      esp_bluedroid_init();
-    }
-    if (bt_state != ESP_BLUEDROID_STATUS_ENABLED) {
-      esp_bluedroid_enable();
-    }
-
+    initBLE();
     bleInitialized = true;
   }
 }

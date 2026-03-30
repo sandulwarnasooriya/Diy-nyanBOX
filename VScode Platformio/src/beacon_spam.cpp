@@ -10,6 +10,7 @@
 */
 
 #include "../include/beacon_spam.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include "../include/setting.h"
@@ -370,10 +371,7 @@ void beaconSpamSetup() {
   beacon_isScanning = false;
   beacon_lastApCount = 0;
 
-  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-  esp_wifi_init(&cfg);
-  esp_wifi_set_mode(WIFI_MODE_STA);
-  esp_wifi_start();
+  initWiFi(WIFI_MODE_STA);
 
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_channel(channels[0], WIFI_SECOND_CHAN_NONE);

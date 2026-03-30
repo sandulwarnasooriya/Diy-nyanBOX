@@ -10,6 +10,7 @@
 */
 
 #include "../include/channel_analyzer.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include "esp_wifi.h"
@@ -239,10 +240,7 @@ void renderChannelChart() {
 }
 
 void channelAnalyzerSetup() {
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    esp_wifi_init(&cfg);
-    esp_wifi_set_mode(WIFI_MODE_STA);
-    esp_wifi_start();
+    initWiFi(WIFI_MODE_STA);
 
     scanInProgress = false;
     hasData = false;

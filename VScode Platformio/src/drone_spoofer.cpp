@@ -21,6 +21,7 @@
 #include "esp_bt.h"
 #include "esp_gap_ble_api.h"
 #include "esp_bt_main.h"
+#include "../include/radio_manager.h"
 #include <cstring>
 
 extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
@@ -373,74 +374,23 @@ static void sendWiFiNAN(const uint8_t *odidMsg) {
     esp_wifi_80211_tx(WIFI_IF_STA, wifiNanFrame, sizeof(wifiNanFrame), false);
 }
 
-static void initBLE() {
+static void startBLE() {
     if (bleInitialized) return;
-
-    if (!btStarted()) {
-        btStart();
-        delay(20);
-    }
-
-    esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-    if (bt_state == ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-        esp_bluedroid_init();
-        delay(20);
-    }
-    bt_state = esp_bluedroid_get_status();
-    if (bt_state == ESP_BLUEDROID_STATUS_INITIALIZED) {
-        esp_bluedroid_enable();
-        delay(20);
-    }
-
+    if (!initBLE()) return;
     esp_ble_gap_register_callback(gap_event_handler);
     bleInitialized = true;
 }
 
 static void stopBLE() {
     if (!bleInitialized) return;
-
-    if (isAdvertising) {
-        esp_ble_gap_stop_advertising();
-        delay(20);
-    }
-
-    esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-    if (bt_state == ESP_BLUEDROID_STATUS_ENABLED) {
-        esp_bluedroid_disable();
-        delay(20);
-    }
-    bt_state = esp_bluedroid_get_status();
-    if (bt_state != ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-        esp_bluedroid_deinit();
-        delay(20);
-    }
-
-    if (btStarted()) {
-        btStop();
-        delay(20);
-    }
-
+    cleanupBLE();
     bleInitialized = false;
     isAdvertising = false;
 }
 
-static void initWiFi() {
+static void startWiFi() {
     if (wifiInitialized) return;
-
-    wifi_mode_t currentMode;
-    if (esp_wifi_get_mode(&currentMode) == ESP_OK) {
-        esp_wifi_set_promiscuous(false);
-        esp_wifi_stop();
-        delay(20);
-    } else {
-        wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-        esp_wifi_init(&cfg);
-    }
-
-    esp_wifi_set_storage(WIFI_STORAGE_RAM);
-    esp_wifi_set_mode(WIFI_MODE_STA);
-    esp_wifi_start();
-    delay(50);
+    initWiFi(WIFI_MODE_STA);
     esp_wifi_set_promiscuous(true);
     esp_wifi_set_channel(WIFI_CHANNEL, WIFI_SECOND_CHAN_NONE);
     wifiInitialized = true;
@@ -457,11 +407,11 @@ static void stopWiFi() {
 static void switchPhase() {
     if (spooferMode == DS_BLE) {
         stopBLE();
-        initWiFi();
+        startWiFi();
         spooferMode = DS_WIFI;
     } else {
         stopWiFi();
-        initBLE();
+        startBLE();
         spooferMode = DS_BLE;
     }
 }
@@ -560,7 +510,7 @@ void droneSpooferLoop() {
             if (spooferMode == DS_IDLE) {
                 spooferMode = DS_BLE;
                 drawDisplay();
-                initBLE();
+                startBLE();
             } else {
                 if (spooferMode == DS_BLE) stopBLE();
                 else stopWiFi();
@@ -599,8 +549,6 @@ void droneSpooferLoop() {
 
 void cleanupDroneSpoofer() {
     if (spooferMode == DS_BLE) stopBLE();
-    else if (spooferMode == DS_WIFI) stopWiFi();
     spooferMode = DS_IDLE;
-    esp_wifi_deinit();
-    delay(50);
+    cleanupWiFi();
 }

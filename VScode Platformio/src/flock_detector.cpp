@@ -18,6 +18,7 @@
 #include "esp_bt.h"
 #include "esp_gap_ble_api.h"
 #include "esp_bt_main.h"
+#include "../include/radio_manager.h"
 #include <vector>
 
 extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
@@ -393,29 +394,13 @@ void flockDetectorSetup() {
     u8g2.begin();
     u8g2.setFont(u8g2_font_6x10_tr);
 
-    wifi_mode_t currentMode;
-    if (esp_wifi_get_mode(&currentMode) == ESP_OK) {
-        esp_wifi_disconnect();
-        esp_wifi_stop();
-        wifiInitialized = true;
-    } else {
-        wifiInitialized = false;
-    }
-
-    if (!wifiInitialized) {
-        wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-        esp_wifi_init(&cfg);
-    }
-
-    esp_wifi_set_mode(WIFI_MODE_STA);
-    esp_wifi_start();
+    initWiFi(WIFI_MODE_STA);
     esp_wifi_set_ps(WIFI_PS_NONE);
     esp_wifi_set_promiscuous(true);
     esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler);
     wifi_promiscuous_filter_t flt = {.filter_mask = WIFI_PROMIS_FILTER_MASK_MGMT};
     esp_wifi_set_promiscuous_filter(&flt);
     esp_wifi_set_channel(1, WIFI_SECOND_CHAN_NONE);
-
     wifiInitialized = true;
 
     pinMode(BTN_UP, INPUT_PULLUP);
@@ -459,18 +444,7 @@ void flockDetectorLoop() {
                 esp_wifi_stop();
                 delay(100);
 
-                if (!btStarted()) {
-                    btStart();
-                }
-
-                esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-                if (bt_state == ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-                    esp_bluedroid_init();
-                }
-                if (bt_state != ESP_BLUEDROID_STATUS_ENABLED) {
-                    esp_bluedroid_enable();
-                }
-
+                initBLE();
                 esp_ble_gap_register_callback(esp_gap_cb);
                 esp_ble_gap_set_scan_params(&ble_scan_params);
                 bleInitialized = true;
@@ -521,23 +495,7 @@ void flockDetectorLoop() {
 
             if (!isScanning && elapsed >= effectiveBleScanDuration) {
                 if (bleInitialized) {
-                    esp_ble_gap_stop_scanning();
-                    delay(50);
-
-                    esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-                    if (bt_state == ESP_BLUEDROID_STATUS_ENABLED) {
-                        esp_bluedroid_disable();
-                        delay(50);
-                    }
-                    if (bt_state != ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-                        esp_bluedroid_deinit();
-                        delay(50);
-                    }
-
-                    if (btStarted()) {
-                        btStop();
-                        delay(50);
-                    }
+                    cleanupBLE();
                     bleInitialized = false;
                 }
 
@@ -668,18 +626,7 @@ void flockDetectorLoop() {
                 esp_wifi_stop();
                 delay(100);
 
-                if (!btStarted()) {
-                    btStart();
-                }
-
-                esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-                if (bt_state == ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-                    esp_bluedroid_init();
-                }
-                if (bt_state != ESP_BLUEDROID_STATUS_ENABLED) {
-                    esp_bluedroid_enable();
-                }
-
+                initBLE();
                 esp_ble_gap_register_callback(esp_gap_cb);
                 esp_ble_gap_set_scan_params(&ble_scan_params);
                 bleInitialized = true;
@@ -693,25 +640,8 @@ void flockDetectorLoop() {
             memset(locateTargetAddress, 0, sizeof(locateTargetAddress));
 
             if (bleInitialized) {
-                esp_ble_gap_stop_scanning();
-                delay(50);
-
-                esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-                if (bt_state == ESP_BLUEDROID_STATUS_ENABLED) {
-                    esp_bluedroid_disable();
-                    delay(50);
-                }
-                if (bt_state != ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-                    esp_bluedroid_deinit();
-                    delay(50);
-                }
-
-                if (btStarted()) {
-                    btStop();
-                    delay(50);
-                }
+                cleanupBLE();
                 bleInitialized = false;
-
                 esp_wifi_start();
                 delay(50);
                 esp_wifi_set_ps(WIFI_PS_NONE);
@@ -893,29 +823,6 @@ void flockDetectorLoop() {
 }
 
 void cleanupFlockDetector() {
-    wifi_mode_t mode;
-    if (esp_wifi_get_mode(&mode) == ESP_OK) {
-        esp_wifi_set_promiscuous(false);
-        esp_wifi_stop();
-        delay(50);
-        esp_wifi_deinit();
-        delay(100);
-    }
-
-    esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-    if (bt_state == ESP_BLUEDROID_STATUS_ENABLED) {
-        esp_ble_gap_stop_scanning();
-        delay(50);
-        esp_bluedroid_disable();
-        delay(50);
-    }
-    if (bt_state != ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-        esp_bluedroid_deinit();
-        delay(50);
-    }
-
-    if (btStarted()) {
-        btStop();
-        delay(50);
-    }
+    cleanupWiFi();
+    cleanupBLE();
 }

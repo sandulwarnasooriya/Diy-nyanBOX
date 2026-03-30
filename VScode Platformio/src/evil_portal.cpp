@@ -10,6 +10,7 @@
 */
 
 #include "../include/evil_portal.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include "../include/pindefs.h"
@@ -293,15 +294,8 @@ void setupPortalAP() {
 void stopPortalAP() {
     portalServer.stop();
     portalDNS.stop();
-    esp_wifi_stop();
-    delay(50);
-    esp_wifi_deinit();
-    delay(50);
-
-    if (ap_netif != NULL) {
-        esp_netif_destroy(ap_netif);
-        ap_netif = NULL;
-    }
+    cleanupWiFi();
+    ap_netif = NULL;
 }
 
 void processScanResults(unsigned long now) {
@@ -639,10 +633,7 @@ void evilPortalSetup() {
     esp_netif_init();
     esp_event_loop_create_default();
 
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    esp_wifi_init(&cfg);
-    esp_wifi_set_mode(WIFI_MODE_STA);
-    esp_wifi_start();
+    initWiFi(WIFI_MODE_STA);
 
     scannedSSIDs.clear();
     portal_isScanning = true;
@@ -788,10 +779,7 @@ void evilPortalLoop() {
             if (leftNow && !leftPressed) {
                 stopPortalAP();
 
-                wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-                esp_wifi_init(&cfg);
-                esp_wifi_set_mode(WIFI_MODE_STA);
-                esp_wifi_start();
+                initWiFi(WIFI_MODE_STA);
 
                 currentState = PORTAL_MENU;
                 menuEnterTime = millis();
@@ -870,16 +858,6 @@ void cleanupEvilPortal() {
         portalServer.stop();
         portalDNS.stop();
     }
-
-    esp_wifi_stop();
-    delay(50);
-    esp_wifi_deinit();
-    delay(50);
-
-    if (ap_netif != NULL) {
-        esp_netif_destroy(ap_netif);
-        ap_netif = NULL;
-    }
-
-    delay(100);
+    cleanupWiFi();
+    ap_netif = NULL;
 }
