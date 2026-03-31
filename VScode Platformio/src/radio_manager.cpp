@@ -17,8 +17,20 @@
 #include "esp_bt_main.h"
 #include "esp_gap_ble_api.h"
 #include <Arduino.h>
+#include <RF24.h>
+
+extern RF24 radios[3];
+
+static bool classicBtMemReleased = false;
 
 bool initBLE() {
+    if (esp_bt_controller_get_status() == ESP_BT_CONTROLLER_STATUS_IDLE) {
+        if (!classicBtMemReleased) {
+            esp_bt_mem_release(ESP_BT_MODE_CLASSIC_BT); // Release Classic Bluetooth memory to free up resources for BLE operations
+            classicBtMemReleased = true;
+        }
+    }
+
     if (!btStarted()) {
         btStart();
         delay(50);
@@ -76,6 +88,7 @@ bool initWiFi(wifi_mode_t mode) {
 }
 
 void cleanupRadio() {
+    for (auto &r : radios) r.powerDown();
     cleanupWiFi();
     cleanupBLE();
 }
