@@ -63,7 +63,7 @@ Built around an ESP32 with triple NRF24 modules, a crisp OLED display, and a 250
 - **WiFi Scanner** – Detects nearby WiFi access points with full client detection. View connected clients for each network, monitor their signal strength, packet activity, and deauthenticate individual clients.
 - **Channel Analyzer** – Visualizes WiFi congestion across all channels with a real-time bar chart to identify the best channel for your network
 - **WiFi Deauther** – Educational tool for testing network security with deauthentication frames on authorized networks
-- **Deauth Scanner** – Monitors and analyzes WiFi deauthentication frames in real-time
+- **Deauth Scanner** – Monitors and analyzes WiFi deauthentication frames in real-time. Displays the source MAC, channel, and live RSSI of the deauthing transmitter. Use it to physically locate the source of a deauth attack.
 - **Beacon Spam** – Broadcasts multiple fake WiFi networks for testing. Choose to clone real nearby networks, select specific SSIDs, or use a list of random names.
 - **Evil Portal** – Creates captive portal with multiple templates (Generic, Facebook, Google) that automatically scans nearby networks for realistic SSID spoofing and credential capture.
 - **Pineapple Detector** – Detect and identify nearby Pineapple devices

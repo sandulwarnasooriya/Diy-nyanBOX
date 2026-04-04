@@ -1,7 +1,7 @@
 /*
     nyanBOX by Nyan Devices
     https://github.com/jbohack/nyanBOX
-    Copyright (c) 2025 jbohack
+    Copyright (c) 2026 jbohack
 
     Licensed under the MIT License
     https://opensource.org/licenses/MIT
@@ -40,6 +40,9 @@ static uint16_t totalDeauths = 0;
 
 static uint8_t lastDeauthMAC[6] = {0};
 static uint8_t lastDeauthChannel = 0;
+static int8_t displayedRSSI = 0;
+static int32_t rssiAccum = 0;
+static uint16_t rssiCount = 0;
 static bool macSeen = false;
 
 static unsigned long lastChannelHop = 0;
@@ -54,6 +57,7 @@ static bool lastDisplayedMode = true;
 static bool lastMacSeen = false;
 static unsigned long lastPeriodicUpdate = 0;
 const unsigned long periodicUpdateInterval = 1000;
+static unsigned long lastRSSIUpdate = 0;
 
 // Bypass sanity checks for raw 802.11 frames
 extern "C" int ieee80211_raw_frame_sanity_check(int32_t, int32_t, int32_t) {
@@ -68,6 +72,14 @@ typedef struct {
     uint8_t addr3[6];
     uint16_t sequence_ctrl;
 } __attribute__((packed)) wifi_ieee80211_mac_hdr_t;
+
+static void fmtCount(char *out, size_t sz, unsigned long val) {
+    if (val < 1000) {
+        snprintf(out, sz, "%lu", val);
+    } else {
+        snprintf(out, sz, "%.2fk", val / 1000.0);
+    }
+}
 
 void formatMAC(char *output, const uint8_t *mac) {
     if (!macSeen) {
@@ -90,6 +102,8 @@ void packetSniffer(void *buf, wifi_promiscuous_pkt_type_t type) {
     if ((fc & 0xFC) == 0xC0) {  // Deauthentication frame filter
         memcpy(lastDeauthMAC, hdr->addr2, 6);
         lastDeauthChannel = currentChannel;
+        rssiAccum += packet->rx_ctrl.rssi;
+        rssiCount++;
         macSeen = true;
         deauthCount++;
         totalDeauths++;
@@ -119,6 +133,9 @@ void deauthScannerSetup() {
     macSeen = false;
     memset(lastDeauthMAC, 0, sizeof(lastDeauthMAC));
     lastDeauthChannel = 0;
+    displayedRSSI = 0;
+    rssiAccum = 0;
+    rssiCount = 0;
     lastChannelHop = millis();
     lastButtonPress = 0;
 
@@ -129,6 +146,7 @@ void deauthScannerSetup() {
     lastDisplayedMode = true;
     lastMacSeen = false;
     lastPeriodicUpdate = millis();
+    lastRSSIUpdate = millis();
 
     pinMode(BTN_UP, INPUT_PULLUP);
     pinMode(BTN_DOWN, INPUT_PULLUP);
@@ -142,49 +160,52 @@ void renderDeauthStats() {
     char headerStr[32];
     char macStr[18];
 
-    const char* modeText = useMainChannels ? "Main Channels" : "All Channels";
+    const char* modeText = useMainChannels ? "Main CH" : "All CH";
     snprintf(headerStr, sizeof(headerStr), "CH:%2d | %s", currentChannel, modeText);
     formatMAC(macStr, lastDeauthMAC);
 
     u8g2.clearBuffer();
-    
+
     u8g2.setFont(u8g2_font_helvR08_tr);
     int headerWidth = u8g2.getUTF8Width(headerStr);
-    u8g2.drawStr((128 - headerWidth) / 2, 12, headerStr);
-    
-    char currentStr[32];
-    snprintf(currentStr, sizeof(currentStr), "Current: %4d", deauthCount);
-    int currentWidth = u8g2.getUTF8Width(currentStr);
-    u8g2.drawStr((128 - currentWidth) / 2, 24, currentStr);
-    
-    char totalStr[32];
-    snprintf(totalStr, sizeof(totalStr), "Total: %4d", totalDeauths);
-    int totalWidth = u8g2.getUTF8Width(totalStr);
-    u8g2.drawStr((128 - totalWidth) / 2, 36, totalStr);
-    
+    u8g2.drawStr((128 - headerWidth) / 2, 10, headerStr);
+
+    char curBuf[10], totBuf[10];
+    fmtCount(curBuf, sizeof(curBuf), deauthCount);
+    fmtCount(totBuf, sizeof(totBuf), totalDeauths);
+    char countsStr[32];
+    snprintf(countsStr, sizeof(countsStr), "Cur:%s  Tot:%s", curBuf, totBuf);
+    int countsWidth = u8g2.getUTF8Width(countsStr);
+    u8g2.drawStr((128 - countsWidth) / 2, 21, countsStr);
+
     u8g2.setFont(u8g2_font_5x8_tr);
     if (macSeen) {
         const char* macLabel = "Last MAC:";
         int macLabelWidth = u8g2.getUTF8Width(macLabel);
-        u8g2.drawStr((128 - macLabelWidth) / 2, 46, macLabel);
+        u8g2.drawStr((128 - macLabelWidth) / 2, 31, macLabel);
 
         char maskedMAC[18];
         maskMAC(macStr, maskedMAC);
         char macChanStr[24];
         snprintf(macChanStr, sizeof(macChanStr), "%s CH%d", maskedMAC, lastDeauthChannel);
         int macChanWidth = u8g2.getUTF8Width(macChanStr);
-        u8g2.drawStr((128 - macChanWidth) / 2, 54, macChanStr);
+        u8g2.drawStr((128 - macChanWidth) / 2, 41, macChanStr);
+
+        char rssiStr[16];
+        snprintf(rssiStr, sizeof(rssiStr), "RSSI: %d dBm", displayedRSSI);
+        int rssiWidth = u8g2.getUTF8Width(rssiStr);
+        u8g2.drawStr((128 - rssiWidth) / 2, 51, rssiStr);
     } else {
         const char* waitMsg = "Scanning for deauths...";
         int waitWidth = u8g2.getUTF8Width(waitMsg);
-        u8g2.drawStr((128 - waitWidth) / 2, 50, waitMsg);
+        u8g2.drawStr((128 - waitWidth) / 2, 41, waitMsg);
     }
-    
+
     u8g2.setFont(u8g2_font_4x6_tr);
     const char* instruction = "LEFT=Mode  SEL=Exit";
     int instrWidth = u8g2.getUTF8Width(instruction);
-    u8g2.drawStr((128 - instrWidth) / 2, 64, instruction);
-    
+    u8g2.drawStr((128 - instrWidth) / 2, 61, instruction);
+
     u8g2.sendBuffer();
     displayMirrorSend(u8g2);
 }
@@ -257,6 +278,15 @@ void deauthScannerLoop() {
     if (now - lastPeriodicUpdate >= periodicUpdateInterval) {
         lastPeriodicUpdate = now;
         needsRedraw = true;
+    }
+
+    if (now - lastRSSIUpdate >= periodicUpdateInterval) {
+        if (rssiCount > 0) {
+            displayedRSSI = (int8_t)(rssiAccum / rssiCount);
+            rssiAccum = 0;
+            rssiCount = 0;
+        }
+        lastRSSIUpdate = now;
     }
 
     if (needsRedraw) {
