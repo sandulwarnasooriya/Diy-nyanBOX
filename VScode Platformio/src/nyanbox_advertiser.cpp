@@ -1,11 +1,16 @@
 /*
-   ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
 */
 
 #include "../include/nyanbox_advertiser.h"
+#include "../include/radio_manager.h"
 #include "../include/nyanbox_common.h"
 #include "esp_bt.h"
 #include "esp_gap_ble_api.h"
@@ -95,18 +100,8 @@ void startNyanboxAdvertiser() {
     
     advertiserEnabled = true;
     
-    if (!btStarted()) {
-        btStart();
-    }
+    initBLE();
 
-    esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-    if (bt_state == ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-        esp_bluedroid_init();
-    }
-    if (bt_state != ESP_BLUEDROID_STATUS_ENABLED) {
-        esp_bluedroid_enable();
-    }
-    
     buildAdvertisementData();
     
     esp_ble_gap_config_adv_data_raw(advData, advDataLen);
@@ -120,25 +115,7 @@ void stopNyanboxAdvertiser() {
     advertiserEnabled = false;
     
     if (advertiserActive) {
-        esp_ble_gap_stop_scanning();
-        delay(50);
-        esp_ble_gap_stop_advertising();
-        delay(50);
-
-        esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-        if (bt_state == ESP_BLUEDROID_STATUS_ENABLED) {
-          esp_bluedroid_disable();
-          delay(50);
-        }
-        if (bt_state != ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-          esp_bluedroid_deinit();
-          delay(50);
-        }
-
-        if (btStarted()) {
-          btStop();
-          delay(50);
-        }
+        cleanupBLE();
         advertiserActive = false;
     }
 }
@@ -147,18 +124,8 @@ void updateNyanboxAdvertiser() {
     if (!advertiserEnabled || advertiserActive) return;
     
     if (!advertiserActive) {
-        if (!btStarted()) {
-            btStart();
-        }
+        initBLE();
 
-        esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-        if (bt_state == ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-            esp_bluedroid_init();
-        }
-        if (bt_state != ESP_BLUEDROID_STATUS_ENABLED) {
-            esp_bluedroid_enable();
-        }
-        
         buildAdvertisementData();
         
         esp_ble_gap_config_adv_data_raw(advData, advDataLen);

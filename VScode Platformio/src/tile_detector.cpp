@@ -1,11 +1,16 @@
 /*
-   ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
 */
 
 #include "../include/tile_detector.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include "../include/setting.h"
@@ -272,17 +277,7 @@ void tileDetectorSetup() {
     u8g2.sendBuffer();
     displayMirrorSend(u8g2);
 
-    if (!btStarted()) {
-        btStart();
-    }
-
-    esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-    if (bt_state == ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-        esp_bluedroid_init();
-    }
-    if (bt_state != ESP_BLUEDROID_STATUS_ENABLED) {
-        esp_bluedroid_enable();
-    }
+    initBLE();
 
     esp_ble_gap_register_callback(esp_gap_cb);
     esp_ble_gap_set_scan_params(&ble_scan_params);
@@ -501,10 +496,14 @@ void tileDetectorLoop() {
         u8g2.setFont(u8g2_font_5x8_tr);
         char buf[32];
 
-        snprintf(buf, sizeof(buf), "%.16s", dev.name);
+        char maskedName[33];
+        maskName(dev.name, maskedName, sizeof(maskedName) - 1);
+        snprintf(buf, sizeof(buf), "%.16s", maskedName);
         u8g2.drawStr(0, 8, buf);
 
-        snprintf(buf, sizeof(buf), "%s", dev.address);
+        char maskedAddress[18];
+        maskMAC(dev.address, maskedAddress);
+        snprintf(buf, sizeof(buf), "%s", maskedAddress);
         u8g2.drawStr(0, 16, buf);
 
         u8g2.setFont(u8g2_font_7x13B_tr);
@@ -549,9 +548,15 @@ void tileDetectorLoop() {
         auto &dev = tileDevices[currentIndex];
         u8g2.setFont(u8g2_font_5x8_tr);
         char buf[32];
-        snprintf(buf, sizeof(buf), "Name: %s", dev.name);
+
+        char maskedName[33];
+        maskName(dev.name, maskedName, sizeof(maskedName) - 1);
+        snprintf(buf, sizeof(buf), "Name: %s", maskedName);
         u8g2.drawStr(0, 10, buf);
-        snprintf(buf, sizeof(buf), "MAC: %s", dev.address);
+
+        char maskedAddress[18];
+        maskMAC(dev.address, maskedAddress);
+        snprintf(buf, sizeof(buf), "MAC: %s", maskedAddress);
         u8g2.drawStr(0, 20, buf);
         snprintf(buf, sizeof(buf), "RSSI: %d", dev.rssi);
         u8g2.drawStr(0, 30, buf);
@@ -572,7 +577,9 @@ void tileDetectorLoop() {
                 u8g2.drawStr(0, 20 + i * 10, ">");
             char line[32];
             const char* displayName = d.hasName && d.name[0] ? d.name : "Tile";
-            snprintf(line, sizeof(line), "%.8s | RSSI %d", displayName, d.rssi);
+            char maskedName[33];
+            maskName(displayName, maskedName, sizeof(maskedName) - 1);
+            snprintf(line, sizeof(line), "%.8s | RSSI %d", maskedName, d.rssi);
             u8g2.drawStr(10, 20 + i * 10, line);
         }
     }

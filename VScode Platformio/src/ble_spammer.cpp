@@ -1,10 +1,17 @@
-/* ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________ */
-      
+/*
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
+*/
+
 #include "../include/pindefs.h"
 #include "ble_spammer.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include <U8g2lib.h>
@@ -29,7 +36,7 @@ static bool needsRedraw = true;
 static unsigned long lastActiveUpdate = 0;
 const unsigned long activeUpdateInterval = 1000;
 
-// BLE advertising parameters (connectable but we reject connections in the esp_ble_gap_register_callback)
+// BLE advertising parameters (connectable, but connections are rejected in esp_ble_gap_register_callback)
 static esp_ble_adv_params_t adv_params = {
     .adv_int_min = 0x20,
     .adv_int_max = 0x40,
@@ -39,7 +46,7 @@ static esp_ble_adv_params_t adv_params = {
     .adv_filter_policy = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY
 };
     
-// NyanBOX Custom Names
+// NyanBOX custom names
 static const char* customNames[] = {
     "zr_crackin was here",
     "jbohack was here",
@@ -204,17 +211,17 @@ static void make_packet(const char* name, uint8_t* size, PacketPtr* packet) {
     (*packet)[i++] = 2;
     (*packet)[i++] = 0x01;
     (*packet)[i++] = 0x06;
-    // Complete Local Name
+    // Complete local name
     (*packet)[i++] = name_len + 1;
     (*packet)[i++] = 0x09;
     memcpy(&(*packet)[i], name, name_len);
     i += name_len;
-    // Service UUID List (HID)
+    // Service UUID list (HID)
     (*packet)[i++] = 3;
     (*packet)[i++] = 0x02;
     (*packet)[i++] = 0x12;
     (*packet)[i++] = 0x18;
-    // Tx Power Level
+    // TX power level
     (*packet)[i++] = 2;
     (*packet)[i++] = 0x0A;
     (*packet)[i++] = 0x00;
@@ -261,23 +268,13 @@ void bleSpamSetup() {
     pinMode(BUTTON_PIN_RIGHT, INPUT_PULLUP);
     pinMode(BUTTON_PIN_LEFT, INPUT_PULLUP);
 
-    if (!btStarted()) {
-        btStart();
-    }
-
-    esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-    if (bt_state == ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-        esp_bluedroid_init();
-    }
-    if (bt_state != ESP_BLUEDROID_STATUS_ENABLED) {
-        esp_bluedroid_enable();
-    }
+    initBLE();
 
     esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_DEFAULT, ESP_PWR_LVL_P9);
     esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
     esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_SCAN, ESP_PWR_LVL_P9);
 
-    // CB registration to handle incoming connections (we just ignore them)
+    // Callback registration to handle incoming connections (they are ignored)
     esp_ble_gap_register_callback([](esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param){});
 
     bleInitialized = true;

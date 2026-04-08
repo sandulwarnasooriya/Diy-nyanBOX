@@ -1,10 +1,16 @@
-/* ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________
+/*
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
 */
 
 #include "../include/pwnagotchi_spam.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include "esp_wifi.h"
@@ -30,15 +36,15 @@ const int numChannels = sizeof(channels) / sizeof(channels[0]);
 
 // Beacon frame template
 const uint8_t beacon_frame_template[] = {
-    0x80, 0x00,                                     // Frame Control
+    0x80, 0x00,                                     // Frame control
     0x00, 0x00,                                     // Duration
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff,             // Destination Address (Broadcast)
-    0xde, 0xad, 0xbe, 0xef, 0xde, 0xad,             // Source Address (SA)
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff,             // Destination address (broadcast)
+    0xde, 0xad, 0xbe, 0xef, 0xde, 0xad,             // Source address (SA)
     0xde, 0xad, 0xbe, 0xef, 0xde, 0xad,             // BSSID
-    0x00, 0x00,                                     // Sequence/Fragment number
+    0x00, 0x00,                                     // Sequence/fragment number
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Timestamp
     0x64, 0x00,                                     // Beacon interval
-    0x11, 0x04                                      // Capability info
+    0x11, 0x04                                      // Capability information
 };
 
 const char* faces[] = {
@@ -187,23 +193,7 @@ void sendPwnagotchiBeacon(uint8_t channel, const char* face, const char* name) {
 }
 
 void pwnagotchiSpamSetup() {
-    wifi_mode_t currentWifiMode;
-    if (esp_wifi_get_mode(&currentWifiMode) == ESP_OK) {
-        esp_wifi_disconnect();
-        esp_wifi_stop();
-        wifiInitialized = true;
-    } else {
-        wifiInitialized = false;
-    }
-
-    if (!wifiInitialized) {
-        wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-        esp_wifi_init(&cfg);
-    }
-
-    esp_wifi_set_storage(WIFI_STORAGE_RAM);
-    esp_wifi_set_mode(WIFI_MODE_AP);
-    esp_wifi_start();
+    initWiFi(WIFI_MODE_AP);
 
     spamActive = false;
     beaconsSent = 0;

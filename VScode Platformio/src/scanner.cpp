@@ -1,10 +1,17 @@
-/* ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________ */
+/*
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
+*/
 
 #include <Arduino.h>
 #include "../include/scanner.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include "../include/pindefs.h"
@@ -88,7 +95,7 @@ void scanChannels(void) {
     }
 
     // Average the accumulated values for this channel
-    channel[i] = (channel[i] * 100) / samplesPerChannel; // Convert to percentage
+    channel[i] = (channel[i] * 100) / samplesPerChannel; // Convert to a percentage
   }
 }
 
@@ -116,8 +123,8 @@ void outputChannels(void) {
   u8g2.drawLine(127, 0, 127, 63);
 
   for (byte count = 0; count < 64; count += 10) {
-    u8g2.drawLine(127, count, 122, count); // Right side markers
-    u8g2.drawLine(0, count, 5, count);    // Left side markers
+    u8g2.drawLine(127, count, 122, count); // Right-side markers
+    u8g2.drawLine(0, count, 5, count);    // Left-side markers
   }
 
   for (byte count = 10; count < 127; count += 10) {
@@ -125,7 +132,7 @@ void outputChannels(void) {
     u8g2.drawPixel(count, 63);
   }
 
-  // Draw the graph moving right-to-left
+  // Draw the graph moving right to left
   for (byte count = 0; count < 127; count++) {
     u8g2.drawLine(127 - count, 63, 127 - count, 63 - sensorArray[count]);
   }
@@ -144,38 +151,7 @@ void outputChannels(void) {
 void scannerSetup() {
   Serial.begin(115200);
 
-  esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-  if (bt_state == ESP_BLUEDROID_STATUS_ENABLED) {
-      esp_bluedroid_disable();
-      delay(50);
-  }
-  if (bt_state != ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-      esp_bluedroid_deinit();
-      delay(50);
-  }
-  
-  if (btStarted()) {
-      btStop();
-      delay(50);
-  }
-
-  wifi_mode_t mode;
-  if (esp_wifi_get_mode(&mode) == ESP_OK) {
-      esp_wifi_stop();
-      delay(50);
-      esp_wifi_deinit();
-      delay(100);
-  }
-
-  esp_netif_t* sta_netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-  if (sta_netif != NULL) {
-      esp_netif_destroy(sta_netif);
-  }
-
-  esp_netif_t* ap_netif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
-  if (ap_netif != NULL) {
-      esp_netif_destroy(ap_netif);
-  }
+  cleanupRadio();
   
   for (byte count = 0; count <= 128; count++) {
     sensorArray[count] = 0;

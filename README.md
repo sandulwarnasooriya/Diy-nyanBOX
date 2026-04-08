@@ -60,17 +60,19 @@ Built around an ESP32 with triple NRF24 modules, a crisp OLED display, and a 250
 > **⚠️ Note:** Additional advanced tools can be enabled in the Settings menu.
 
 ### 📶 WiFi Tools
-- **WiFi Scanner** – Detects nearby WiFi access points
-- **Channel Analyzer** – Monitors WiFi channel utilization and signal strength for network planning
-- **WiFi Deauther** – Disrupts 2.4GHz WiFi device communication
-- **Deauth Scanner** – Monitors and analyzes WiFi deauthentication frames in real-time
+- **WiFi Scanner** – Detects nearby WiFi access points with full client detection. View connected clients for each network, monitor their signal strength, packet activity, and deauthenticate individual clients.
+- **Channel Analyzer** – Visualizes WiFi congestion across all channels with a real-time bar chart to identify the best channel for your network
+- **WiFi Deauther** – Educational tool for testing network security with deauthentication frames on authorized networks
+- **Deauth Scanner** – Monitors and analyzes WiFi deauthentication frames in real-time. Displays the source MAC, channel, and live RSSI of the deauthing transmitter. Use it to physically locate the source of a deauth attack.
 - **Beacon Spam** – Broadcasts multiple fake WiFi networks for testing. Choose to clone real nearby networks, select specific SSIDs, or use a list of random names.
 - **Evil Portal** – Creates captive portal with multiple templates (Generic, Facebook, Google) that automatically scans nearby networks for realistic SSID spoofing and credential capture.
+- **Pineapple Detector** – Detect and identify nearby Pineapple devices
 - **Pwnagotchi Detector** – Detects nearby Pwnagotchi devices and displays their information
 - **Pwnagotchi Spam** - Pwnagotchi grid flooding tool that generates fake beacon frames with randomized identities, faces, names, and versions (contains optional DoS mode).
 
 ### 🔵 Bluetooth (BLE) Tools
 - **BLE Scanner** – Detects nearby BLE devices
+- **BLE Inspector** – Decodes raw BLE advertising packets from nearby devices, displaying service UUIDs, manufacturer data, TX power, flags, and raw payloads.
 - **nyanBOX Detector** – Discovers nearby nyanBOX devices and displays their information including level, version, and signal strength.
 - **Flipper Scanner** – Detects nearby Flipper Zero devices
 - **Axon Detector** – Detects nearby Axon devices (body cameras, tasers, and other law enforcement equipment)
@@ -79,16 +81,22 @@ Built around an ESP32 with triple NRF24 modules, a crisp OLED display, and a 250
 - **Skimmer Detector** – Detects HC-03, HC-05, and HC-06 Bluetooth modules commonly used in credit card skimming devices.
 - **AirTag Detector** – Scans for and identifies nearby Apple AirTag devices.
 - **AirTag Spoofer** – Clones and rebroadcasts detected Apple AirTag devices for selective or bulk spoofing.
+- **SmartTag Detector** - Scans for and identifies nearby Samsung SmartTag devices.
 - **Tile Detector** - Scans for and identifies nearby Tile Tracker devices.
+- **RayBan Detector** - Scans for and identifies nearby RayBan Meta smart glasses.
 - **BLE Spammer** – Broadcasts BLE advertisement packets for testing
 - **Swift Pair** - Triggers Windows Swift Pair notifications by broadcasting fake Microsoft device advertisements.
 - **Sour Apple** – Mimics Apple Bluetooth signals like AirPods pairing pop-up to test device resilience against protocol exploits.
+- **Sour Droid** – Floods nearby Android and Samsung devices with Google FastPair and Samsung EasySetup pairing notifications by cycling through hundreds of device models to test protocol resilience.
 - **BLE Spoofer** – Clones and rebroadcasts detected BLE devices with complete 1:1 replication of MAC address, name, advertising data, scan response, and connectable state.
 
 ### 📡 Signal & Protocol Tools
+- **Drone Detector** – Detects nearby drones broadcasting RemoteID via WiFi and BLE. Displays drone identification, GPS location, altitude, speed, operator information, and flight status. Features a locate mode with real-time RSSI signal strength meter to help pinpoint drone positions.
+- **Drone Spoofer** – Broadcasts fake Open Drone ID (ODID) Remote ID packets over BLE and WiFi per the ASTM F3411 spec. Generates randomized drone identities, GPS coordinates, altitudes, speeds, and operator IDs.
 - **Flock Detector** - Detects Flock Safety surveillance cameras using dual-mode WiFi and BLE scanning. Identifies devices through SSID patterns, MAC OUI prefixes, and Bluetooth device names. Features real-time signal strength tracking with detailed device info and a locate mode for pinpointing camera positions.
+- **Device Scout** – Wireless device scanner combining Bluetooth and WiFi detection with anti-surveillance capabilities. Discovers nearby devices and ranks by persistence to identify trackers following you.
 - **Scanner** – Scans the 2.4GHz frequency band to detect active channels and devices
-- **Analyzer** – Analyzes detected signals and provides detailed activity information
+- **Analyzer** – Real-time spectrum analyzer with channel filters for targeted RF analysis. Features dynamic display with auto-scaling, peak frequency detection, and instant filter switching via left/right buttons. Analyze WiFi, Bluetooth, or custom frequency bands.
 
 ### 🎮 Leveling System
 nyanBOX features a built-in RPG-style leveling system that tracks your usage throughout using the device:
@@ -299,12 +307,13 @@ Love nyanBOX? Here's how you can help:
 
 - [Poor Man's 2.4 GHz Scanner](https://forum.arduino.cc/t/poor-mans-2-4-ghz-scanner/54846)
 - [arduino_oled_menu](https://github.com/upiir/arduino_oled_menu)
-- [nRF24L01-WiFi-Jammer](https://github.com/hugorezende/nRF24L01-WiFi-Jammer)
 - [Universal-RC-system](https://github.com/alexbeliaev/Universal-RC-system)
 - [AppleJuice](https://github.com/ECTO-1A/AppleJuice)
 - [ESP32-Sour-Apple](https://github.com/RapierXbox/ESP32-Sour-Apple)
 - [PwnGridSpam](https://github.com/7h30th3r0n3/PwnGridSpam)
 - [ESP32-AirTag-Scanner](https://github.com/MatthewKuKanich/ESP32-AirTag-Scanner)
+- [BLE Spam Flipper Application](https://github.com/Next-Flip/Momentum-Apps/tree/c470da2d792fc8c4f165ae2906d79250c33a823c/ble_spam)
+- [opendroneid-core-c](https://github.com/opendroneid/opendroneid-core-c)
 - [ESP Web Tools](https://esphome.github.io/esp-web-tools/)
 - [Flock You](https://github.com/colonelpanichacks/flock-you)
 - [Original nRFBOX Project](https://github.com/cifertech/nrfbox)

@@ -1,10 +1,17 @@
-/* ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________ */
+/*
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
+*/
 
 #include "../include/pindefs.h"
 #include "../include/swiftpair.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include <U8g2lib.h>
@@ -29,7 +36,7 @@ static bool needsRedraw = true;
 static unsigned long lastActiveUpdate = 0;
 const unsigned long activeUpdateInterval = 1000;
 
-// BLE advertising parameters (connectable but we reject connections)
+// BLE advertising parameters (connectable, but connections are rejected)
 static esp_ble_adv_params_t adv_params = {
     .adv_int_min = 0x20,
     .adv_int_max = 0x40,
@@ -260,23 +267,13 @@ void swiftpairSpamSetup() {
     pinMode(BUTTON_PIN_RIGHT, INPUT_PULLUP);
     pinMode(BUTTON_PIN_LEFT, INPUT_PULLUP);
 
-    if (!btStarted()) {
-        btStart();
-    }
-
-    esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-    if (bt_state == ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-        esp_bluedroid_init();
-    }
-    if (bt_state != ESP_BLUEDROID_STATUS_ENABLED) {
-        esp_bluedroid_enable();
-    }
+    initBLE();
 
     esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_DEFAULT, ESP_PWR_LVL_P9);
     esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
     esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_SCAN, ESP_PWR_LVL_P9);
 
-    // CB registration to handle incoming connections (we just ignore them)
+    // Callback registration to handle incoming connections (they are ignored)
     esp_ble_gap_register_callback([](esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param){});
 
     bleInitialized = true;

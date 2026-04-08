@@ -1,7 +1,13 @@
-/* ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________ */
+/*
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2026 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
+*/
 
 #include <Arduino.h>
 #include <SPI.h>
@@ -24,7 +30,9 @@
 #include "../include/scanner.h"
 #include "../include/analyzer.h"
 #include "../include/sourapple.h"
+#include "../include/sourdroid.h"
 #include "../include/blescan.h"
+#include "../include/ble_inspector.h"
 #include "../include/ble_spammer.h"
 #include "../include/ble_spoofer.h"
 #include "../include/swiftpair.h"
@@ -34,6 +42,8 @@
 #include "../include/airtag_detector.h"
 #include "../include/airtag_spoofer.h"
 #include "../include/tile_detector.h"
+#include "../include/smarttag_detector.h"
+#include "../include/rayban_detector.h"
 #include "../include/wifiscan.h"
 #include "../include/deauth.h"
 #include "../include/deauth_scanner.h"
@@ -51,8 +61,14 @@
 #include "../include/legal_disclaimer.h"
 #include "../include/cardskimmer_detector.h"
 #include "../include/axon_detector.h"
+#include "../include/drone_detector.h"
+#include "../include/drone_spoofer.h"
 #include "../include/flock_detector.h"
+#include "../include/device_scout.h"
+#include "../include/pineapple_detector.h"
 #include "../include/display_mirror.h"
+#include "../include/password.h"
+#include "../include/radio_manager.h"
 
 RF24 radios[] = {
   RF24(RADIO_CE_PIN_1, RADIO_CSN_PIN_1),
@@ -200,7 +216,9 @@ int getXPAmount(const char* appName) {
 bool isReconApp(const char* appName) {
   return strstr(appName, "Scan") != nullptr || 
          strstr(appName, "Detector") != nullptr ||
-         strstr(appName, "Analyzer") != nullptr;
+         strstr(appName, "Scout") != nullptr ||
+         strstr(appName, "Analyzer") != nullptr ||
+         strstr(appName, "Inspect") != nullptr;
 }
 
 bool isDangerousApp(const char* appName) {
@@ -216,6 +234,7 @@ bool isOffensiveApp(const char* appName) {
          strstr(appName, "Spam") != nullptr ||
          strstr(appName, "Swift Pair") != nullptr ||
          strstr(appName, "Sour Apple") != nullptr ||
+         strstr(appName, "Sour Droid") != nullptr ||
          strstr(appName, "Spoofer") != nullptr ||
          strstr(appName, "Evil Portal") != nullptr;
 }
@@ -335,74 +354,6 @@ void updateAppXP() {
 void enterMenu(AppMenuState st);
 void runApp(MenuItem &mi);
 
-void cleanupWiFi() {
-  wifi_mode_t mode;
-  if (esp_wifi_get_mode(&mode) == ESP_OK) {
-    esp_wifi_stop();
-    delay(50);
-    esp_wifi_deinit();
-    delay(100);
-  }
-
-  esp_netif_t* sta_netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-  if (sta_netif != NULL) {
-    esp_netif_destroy(sta_netif);
-  }
-
-  esp_netif_t* ap_netif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
-  if (ap_netif != NULL) {
-    esp_netif_destroy(ap_netif);
-  }
-
-  delay(100);
-}
-
-void cleanupRadio() {
-  for (auto &r : radios) r.powerDown();
-
-  wifi_mode_t mode;
-  if (esp_wifi_get_mode(&mode) == ESP_OK) {
-    esp_wifi_stop();
-    delay(50);
-    esp_wifi_deinit();
-    delay(100);
-  }
-
-  esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-  if (bt_state == ESP_BLUEDROID_STATUS_ENABLED) {
-    esp_bluedroid_disable();
-    delay(50);
-  }
-  if (bt_state != ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-    esp_bluedroid_deinit();
-    delay(50);
-  }
-  
-  if (btStarted()) {
-    btStop();
-    delay(50);
-  }
-}
-
-void cleanupBLE() {
-  delay(100);
-
-  esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-  if (bt_state == ESP_BLUEDROID_STATUS_ENABLED) {
-    esp_bluedroid_disable();
-    delay(50);
-  }
-  if (bt_state != ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-    esp_bluedroid_deinit();
-    delay(50);
-  }
-  
-  if (btStarted()) {
-    btStop();
-    delay(50);
-  }
-}
-
 void noCleanup() {
 }
 
@@ -414,12 +365,13 @@ MenuItem mainMenu[] = {
 constexpr int MAIN_MENU_SIZE = sizeof(mainMenu) / sizeof(mainMenu[0]);
 
 MenuItem wifiMenu[] = {
-  { "WiFi Scan",       nullptr, wifiscanSetup,           wifiscanLoop,           cleanupWiFi },
+  { "WiFi Scan",       nullptr, wifiscanSetup,           wifiscanLoop,           wifiscanCleanup },
   { "Channel Analyzer", nullptr, channelAnalyzerSetup,   channelAnalyzerLoop,    cleanupWiFi },
   { "WiFi Deauther",   nullptr, deauthSetup,             deauthLoop,             cleanupWiFi },
   { "Deauth Scanner",  nullptr, deauthScannerSetup,      deauthScannerLoop,      cleanupWiFi },
   { "Beacon Spam",     nullptr, beaconSpamSetup,         beaconSpamLoop,         cleanupWiFi },
   { "Evil Portal",     nullptr, evilPortalSetup,         evilPortalLoop,         cleanupEvilPortal },
+  { "Pineapple Detector", nullptr, pineappleDetectorSetup, pineappleDetectorLoop, cleanupWiFi },
   { "Pwnagotchi Detector", nullptr, pwnagotchiDetectorSetup, pwnagotchiDetectorLoop, cleanupWiFi },
   { "Pwnagotchi Spam", nullptr, pwnagotchiSpamSetup,     pwnagotchiSpamLoop,     cleanupWiFi },
   { "Back",            nullptr, nullptr,                 nullptr,                noCleanup }
@@ -428,6 +380,7 @@ constexpr int WIFI_MENU_SIZE = sizeof(wifiMenu) / sizeof(wifiMenu[0]);
 
 MenuItem bleMenu[] = {
   { "BLE Scan",     nullptr, blescanSetup,             blescanLoop,             cleanupBLE },
+  { "BLE Inspector",   nullptr, bleInspectorSetup,            bleInspectorLoop,            cleanupBLE },
   { "nyanBOX Detector", nullptr, nyanboxDetectorSetup,         nyanboxDetectorLoop,         cleanupBLE },
   { "Flipper Zero Detector", nullptr, flipperZeroDetectorSetup, flipperZeroDetectorLoop, cleanupBLE },
   { "Axon Detector", nullptr, axonDetectorSetup, axonDetectorLoop, cleanupBLE },
@@ -436,10 +389,13 @@ MenuItem bleMenu[] = {
   { "Skimmer Detector", nullptr, cardskimmerDetectorSetup, cardskimmerDetectorLoop, cleanupBLE },
   { "AirTag Detector", nullptr, airtagDetectorSetup,   airtagDetectorLoop,      cleanupBLE },
   { "AirTag Spoofer", nullptr, airtagSpooferSetup,     airtagSpooferLoop,       cleanupBLE },
+  { "SmartTag Detector", nullptr, smarttagDetectorSetup, smarttagDetectorLoop, cleanupBLE },
   { "Tile Detector", nullptr, tileDetectorSetup,     tileDetectorLoop,       cleanupBLE },
+  { "RayBan Detector", nullptr, raybanDetectorSetup, raybanDetectorLoop, cleanupBLE },
   { "BLE Spammer",  nullptr, bleSpamSetup,             bleSpamLoop,             cleanupBLE },
   { "Swift Pair",   nullptr, swiftpairSpamSetup,       swiftpairSpamLoop,       cleanupBLE },
   { "Sour Apple",   nullptr, sourappleSetup,           sourappleLoop,           cleanupBLE },
+  { "Sour Droid",    nullptr, sourDroidSetup,          sourDroidLoop,          cleanupBLE },
   { "BLE Spoofer",  nullptr, bleSpooferSetup,          bleSpooferLoop,          cleanupBLE },
   { "Back",         nullptr, nullptr,                  nullptr,                 noCleanup }
 };
@@ -447,7 +403,10 @@ constexpr int BLE_MENU_SIZE = sizeof(bleMenu) / sizeof(bleMenu[0]);
 
 MenuItem otherMenu[] = {
   { "SigKill",   nullptr, sigkillSetup,   sigkillLoop,   cleanupRadio },
+  { "Drone Detector", nullptr, droneDetectorSetup, droneDetectorLoop, cleanupDroneDetector },
+  { "Drone Spoofer", nullptr, droneSpooferSetup, droneSpooferLoop, cleanupDroneSpoofer },
   { "Flock Detector", nullptr, flockDetectorSetup, flockDetectorLoop, cleanupFlockDetector },
+  { "Device Scout", nullptr, deviceScoutSetup, deviceScoutLoop, cleanupDeviceScout },
   { "Scanner",      nullptr, scannerSetup,    scannerLoop,    cleanupRadio },
   { "Analyzer",     nullptr, analyzerSetup,   analyzerLoop,   cleanupRadio },
   { "Setting",      nullptr, settingSetup,    settingLoop,    noCleanup },
@@ -553,14 +512,29 @@ void setup() {
   Serial.begin(115200);
 
   neopixelSetup();
-  for (auto &r : radios) {
-    r.begin();
-    r.setAutoAck(false);
-    r.stopListening();
-    r.setRetries(0,0);
-    r.setPALevel(RF24_PA_MAX, true);
-    r.setDataRate(RF24_2MBPS);
-    r.setCRCLength(RF24_CRC_DISABLED);
+  SPI.begin();
+
+  int cePins[] = {RADIO_CE_PIN_1, RADIO_CE_PIN_2, RADIO_CE_PIN_3};
+  int csnPins[] = {RADIO_CSN_PIN_1, RADIO_CSN_PIN_2, RADIO_CSN_PIN_3};
+
+  for (int i = 0; i < 3; i++) {
+    pinMode(cePins[i], OUTPUT);
+    pinMode(csnPins[i], OUTPUT);
+    digitalWrite(csnPins[i], HIGH);
+    digitalWrite(cePins[i], LOW);
+  }
+  delay(100);
+
+  for (int i = 0; i < 3; i++) {
+    if (!radios[i].begin() || !radios[i].isChipConnected()) {
+      while(true) { delay(1000); }
+    }
+    radios[i].setAutoAck(false);
+    radios[i].stopListening();
+    radios[i].setRetries(0,0);
+    radios[i].setPALevel(RF24_PA_MAX, true);
+    radios[i].setDataRate(RF24_2MBPS);
+    radios[i].setCRCLength(RF24_CRC_DISABLED);
   }
 
   EEPROM.begin(512);
@@ -569,6 +543,20 @@ void setup() {
   dangerousActionsEnabled = false;
 
   loadSleepTimeoutFromEEPROM();
+
+  uint8_t continuousScanValue = EEPROM.read(4);
+  if (continuousScanValue == 0xFF) {
+    continuousScanEnabled = true;
+  } else {
+    continuousScanEnabled = (continuousScanValue == 1);
+  }
+
+  uint8_t privacyModeValue = EEPROM.read(5);
+  if (privacyModeValue == 0xFF) {
+    privacyModeEnabled = false;
+  } else {
+    privacyModeEnabled = (privacyModeValue == 1);
+  }
 
   u8g2.begin();
   u8g2.setContrast(oledBrightness);
@@ -616,11 +604,13 @@ void setup() {
   pinMode(BUTTON_PIN_LEFT, INPUT_PULLUP);
 
   levelSystemSetup();
-  enterMenu(APP_MAIN);
 
   initNyanboxAdvertiser();
   startNyanboxAdvertiser();
 
+  if (passwordEnabled()) { checkPasswordOnBoot(); }
+
+  enterMenu(APP_MAIN);
   displayMirrorSetup();
 }
 
@@ -719,7 +709,10 @@ void loop() {
 
   if (justPressed(BUTTON_LEFT, leftPrev, leftDebounceTime)) {
     updateLastActivity();
-    if (currentState == APP_LEVEL) {
+    if (currentState == APP_LEVEL ||
+        currentState == APP_BLE   ||
+        currentState == APP_WIFI  ||
+        currentState == APP_OTHER) {
       enterMenu(APP_MAIN);
     }
   }

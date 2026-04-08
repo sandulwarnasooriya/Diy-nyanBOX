@@ -1,12 +1,20 @@
-/* ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________ */
+/*
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
+*/
 
 #include "../include/evil_portal.h"
+#include "../include/radio_manager.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include "../include/pindefs.h"
+#include "../include/setting.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
 #include "esp_netif.h"
@@ -15,10 +23,16 @@
 
 extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
 
+const char* customSSIDs[] = {
+    "Free WiFi", "Guest", "Hotel WiFi", "Airport WiFi",
+    "Starbucks", "McDonald's WiFi", "Public WiFi", "Open Network"
+};
+const int customSSIDCount = sizeof(customSSIDs) / sizeof(customSSIDs[0]);
+
 namespace {
 
-enum EvilPortalState { 
-    PORTAL_MENU, 
+enum EvilPortalState {
+    PORTAL_MENU,
     PORTAL_RUNNING,
     PORTAL_VIEW_CREDS,
     PORTAL_SCANNING
@@ -67,12 +81,6 @@ static String lastCurrentSSID = "";
 static int lastCurrentTemplate = -1;
 static unsigned long lastStatusUpdate = 0;
 const unsigned long statusUpdateInterval = 1000;
-
-const char* customSSIDs[] = {
-    "Free WiFi", "Guest", "Hotel WiFi", "Airport WiFi",
-    "Starbucks", "McDonald's WiFi", "Public WiFi", "Open Network"
-};
-const int customSSIDCount = sizeof(customSSIDs) / sizeof(customSSIDs[0]);
 
 WebServer portalServer(80);
 DNSServer portalDNS;
@@ -286,15 +294,8 @@ void setupPortalAP() {
 void stopPortalAP() {
     portalServer.stop();
     portalDNS.stop();
-    esp_wifi_stop();
-    delay(50);
-    esp_wifi_deinit();
-    delay(50);
-
-    if (ap_netif != NULL) {
-        esp_netif_destroy(ap_netif);
-        ap_netif = NULL;
-    }
+    cleanupWiFi();
+    ap_netif = NULL;
 }
 
 void processScanResults(unsigned long now) {
@@ -461,13 +462,15 @@ void drawPortalMenu() {
             snprintf(itemStr, sizeof(itemStr), "%s %s",
                     selected ? ">" : " ", templateNames[currentTemplate]);
         } else if (i == 2) {
+            char maskedSSID[33];
+            maskNameEvilPortal(currentSSID.c_str(), maskedSSID, sizeof(maskedSSID) - 1, customSSIDs, customSSIDCount);
             char truncatedSSID[16];
-            if (currentSSID.length() > 12) {
-                strncpy(truncatedSSID, currentSSID.c_str(), 12);
+            if (strlen(maskedSSID) > 12) {
+                strncpy(truncatedSSID, maskedSSID, 12);
                 truncatedSSID[12] = '\0';
                 strcat(truncatedSSID, "..");
             } else {
-                strcpy(truncatedSSID, currentSSID.c_str());
+                strcpy(truncatedSSID, maskedSSID);
             }
             snprintf(itemStr, sizeof(itemStr), "%s SSID: %s",
                     selected ? ">" : " ", truncatedSSID);
@@ -493,13 +496,15 @@ void drawPortalStatus() {
     u8g2.clearBuffer();
     u8g2.setFont(u8g2_font_5x8_tr);
     u8g2.drawStr(0, 10, "Portal Running");
+    char maskedSSID[33];
+    maskNameEvilPortal(currentSSID.c_str(), maskedSSID, sizeof(maskedSSID) - 1, customSSIDs, customSSIDCount);
     char ssidStr[22];
-    if (currentSSID.length() > 18) {
-        strncpy(ssidStr, currentSSID.c_str(), 16);
+    if (strlen(maskedSSID) > 18) {
+        strncpy(ssidStr, maskedSSID, 16);
         ssidStr[16] = '\0';
         strcat(ssidStr, "..");
     } else {
-        strcpy(ssidStr, currentSSID.c_str());
+        strcpy(ssidStr, maskedSSID);
     }
     u8g2.drawStr(0, 22, ssidStr);
     char templateStr[22];
@@ -534,23 +539,27 @@ void drawCredentialsList() {
     } else {
         const Credential& cred = capturedCreds[credIndex];
 
+        char maskedSSIDFull[33];
+        maskNameEvilPortal(cred.ssid.c_str(), maskedSSIDFull, sizeof(maskedSSIDFull) - 1, customSSIDs, customSSIDCount);
         char ssidStr[22];
-        if (cred.ssid.length() > 20) {
-            strncpy(ssidStr, cred.ssid.c_str(), 18);
+        if (strlen(maskedSSIDFull) > 20) {
+            strncpy(ssidStr, maskedSSIDFull, 18);
             ssidStr[18] = '\0';
             strcat(ssidStr, "..");
         } else {
-            strcpy(ssidStr, cred.ssid.c_str());
+            strcpy(ssidStr, maskedSSIDFull);
         }
         u8g2.drawStr(0, 10, "Net:");
         u8g2.drawStr(25, 10, ssidStr);
 
+        char maskedMACFull[18];
+        maskMAC(cred.macAddress.c_str(), maskedMACFull);
         char macStr[18];
-        if (cred.macAddress.length() > 17) {
-            strncpy(macStr, cred.macAddress.c_str(), 17);
+        if (strlen(maskedMACFull) > 17) {
+            strncpy(macStr, maskedMACFull, 17);
             macStr[17] = '\0';
         } else {
-            strcpy(macStr, cred.macAddress.c_str());
+            strcpy(macStr, maskedMACFull);
         }
         u8g2.drawStr(0, 20, "MAC:");
         u8g2.drawStr(25, 20, macStr);
@@ -624,10 +633,7 @@ void evilPortalSetup() {
     esp_netif_init();
     esp_event_loop_create_default();
 
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    esp_wifi_init(&cfg);
-    esp_wifi_set_mode(WIFI_MODE_STA);
-    esp_wifi_start();
+    initWiFi(WIFI_MODE_STA);
 
     scannedSSIDs.clear();
     portal_isScanning = true;
@@ -712,6 +718,26 @@ void evilPortalLoop() {
                 needsRedraw = true;
                 delay(200);
             }
+            if (leftNow && !leftPressed) {
+                switch (menuSelection) {
+                    case 1:
+                        currentTemplate = (currentTemplate - 1 + numTemplates) % numTemplates;
+                        needsRedraw = true;
+                        break;
+                    case 2:
+                        if (!scannedSSIDs.empty()) {
+                            currentSSIDIndex = (currentSSIDIndex - 1 + scannedSSIDs.size()) % scannedSSIDs.size();
+                            currentSSID = scannedSSIDs[currentSSIDIndex];
+                        } else {
+                            static int ssidIndexL = 0;
+                            ssidIndexL = (ssidIndexL - 1 + customSSIDCount) % customSSIDCount;
+                            currentSSID = String(customSSIDs[ssidIndexL]);
+                        }
+                        needsRedraw = true;
+                        break;
+                }
+                delay(200);
+            }
             if (rightNow && !rightPressed) {
                 switch (menuSelection) {
                     case 0:
@@ -753,10 +779,7 @@ void evilPortalLoop() {
             if (leftNow && !leftPressed) {
                 stopPortalAP();
 
-                wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-                esp_wifi_init(&cfg);
-                esp_wifi_set_mode(WIFI_MODE_STA);
-                esp_wifi_start();
+                initWiFi(WIFI_MODE_STA);
 
                 currentState = PORTAL_MENU;
                 menuEnterTime = millis();
@@ -835,16 +858,6 @@ void cleanupEvilPortal() {
         portalServer.stop();
         portalDNS.stop();
     }
-
-    esp_wifi_stop();
-    delay(50);
-    esp_wifi_deinit();
-    delay(50);
-
-    if (ap_netif != NULL) {
-        esp_netif_destroy(ap_netif);
-        ap_netif = NULL;
-    }
-
-    delay(100);
+    cleanupWiFi();
+    ap_netif = NULL;
 }

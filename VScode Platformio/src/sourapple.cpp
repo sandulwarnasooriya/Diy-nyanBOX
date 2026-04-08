@@ -1,10 +1,16 @@
-/* ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________
+/*
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
 */
 
 #include "../include/sourapple.h"
+#include "../include/radio_manager.h"
 #include "../include/display_mirror.h"
 #include "esp_bt.h"
 #include "esp_gap_ble_api.h"
@@ -107,22 +113,10 @@ void getAdvertisementData(uint8_t *data, uint8_t *len) {
 
 void executeSpam() {
     if (!bleInitialized) {
-        if (!btStarted()) {
-            btStart();
-        }
-
-        esp_bluedroid_status_t bt_state = esp_bluedroid_get_status();
-        if (bt_state == ESP_BLUEDROID_STATUS_UNINITIALIZED) {
-            esp_bluedroid_init();
-        }
-        if (bt_state != ESP_BLUEDROID_STATUS_ENABLED) {
-            esp_bluedroid_enable();
-        }
-
+        initBLE();
         esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
         esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_SCAN, ESP_PWR_LVL_P9);
         esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_DEFAULT, ESP_PWR_LVL_P9);
-        
         bleInitialized = true;
     }
 
